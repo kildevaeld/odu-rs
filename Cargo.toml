@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "core",
+    "odu-value",
+    "odu-types",
+    "odu-func",
+    "odu-validate",
+    "odu-input",
+    "odu-macros"
+]

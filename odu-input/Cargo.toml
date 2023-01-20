@@ -1,0 +1,19 @@
+[package]
+name = "odu-input"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+odu-value = { path = "../odu-value" }
+odu-types = { path = "../odu-types" }
+odu-validate = { path = "../odu-validate" }
+
+[dev-dependencies]
+inquire = { version = "0.5"}
+
+[[example]]
+path = "examples/input.rs"
+name = "input"
+required-features = ["odu-types/derive"]

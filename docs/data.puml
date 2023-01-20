@@ -1,0 +1,15 @@
+@startuml
+
+class Object {
+
+}
+
+class Field {
+    name: string
+}
+
+enum Type {
+    
+}
+
+@enduml

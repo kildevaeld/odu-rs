@@ -1,0 +1,36 @@
+use crate::{Validation, ValidationBox, ValidationError, ValidationList};
+use alloc::vec::Vec;
+use core::any::Any;
+use odu_value::Value;
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug)]
+pub struct OneOf(Vec<ValidationBox>);
+
+#[cfg_attr(feature = "serde", typetag::serde(name = "one_of"))]
+impl Validation for OneOf {
+    // fn as_any(&self) -> &dyn Any {
+    //     self
+    // }
+    fn validate(&self, v: &Value) -> Result<(), ValidationError> {
+        let mut errors = Vec::default();
+
+        for val in &self.0 {
+            if let Err(err) = val.validate(v) {
+                errors.push(err)
+            } else {
+                return Ok(());
+            }
+        }
+
+        if !errors.is_empty() {
+            return Err(ValidationError::OneOf(errors));
+        }
+
+        Ok(())
+    }
+}
+
+pub fn one_of<V: ValidationList>(value: V) -> OneOf {
+    OneOf(value.into_list())
+}

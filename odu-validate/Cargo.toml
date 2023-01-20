@@ -1,0 +1,26 @@
+[package]
+name = "odu-validate"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+serde = ["dep:serde", "typetag", "odu-types/serde", "odu-value/serde"]
+
+[dependencies]
+odu-types = { path = "../odu-types" }
+odu-value = { path = "../odu-value" }
+
+serde = { version = "1", features = ["derive"], optional = true }
+typetag = { version = "0.2", optional = true}
+
+
+[dev-dependencies]
+serde_json = "1"
+
+[[example]]
+name = "validate"
+path = "examples/validate.rs"
+required-features = ["serde"]
