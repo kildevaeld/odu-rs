@@ -19,7 +19,8 @@ mod macros;
 mod merge;
 
 pub use self::{
-    from_value::*, index::Index, into_value::*, list::*, merge::*, number::*, object::*, value::*,
+    from_value::*, index::Index, into_value::*, list::*, macros::*, merge::*, number::*, object::*,
+    value::*,
 };
 
 #[cfg(feature = "serde")]
