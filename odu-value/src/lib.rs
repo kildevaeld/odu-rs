@@ -14,6 +14,8 @@ mod value;
 mod from_value;
 mod into_value;
 
+mod macros;
+
 mod merge;
 
 pub use self::{
