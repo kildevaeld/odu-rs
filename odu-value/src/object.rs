@@ -17,7 +17,7 @@ pub type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V, HashBuilder>;
 
 pub type HashMap<K, V> = StdHashMap<K, V, HashBuilder>;
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Map {
     pub(crate) inner: StdHashMap<String, Value, HashBuilder>,
 }

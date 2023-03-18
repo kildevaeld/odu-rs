@@ -2,6 +2,8 @@
 
 members = [
     "core",
+    "migration",
+
     "odu-value",
     "odu-types",
     "odu-func",

@@ -48,7 +48,7 @@ macro_rules! as_method {
     };
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     Bool(bool),
     Number(Number),

@@ -3,7 +3,7 @@ use odu_types::HasType;
 
 use crate::value::Value;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct List {
     pub(crate) v: Vec<Value>,
 }
