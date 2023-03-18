@@ -9,5 +9,6 @@ members = [
     "odu-func",
     "odu-validate",
     "odu-input",
-    "odu-macros"
+    "odu-macros",
+    "floating"
 ]

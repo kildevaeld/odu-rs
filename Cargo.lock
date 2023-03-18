@@ -614,6 +614,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "floating"
+version = "0.1.0"
+
+[[package]]
 name = "flume"
 version = "0.10.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1209,8 +1213,8 @@ name = "odu-value"
 version = "0.1.0"
 dependencies = [
  "bytes",
+ "floating",
  "hashbrown 0.13.2",
- "num-traits",
  "odu-types",
  "serde",
 ]

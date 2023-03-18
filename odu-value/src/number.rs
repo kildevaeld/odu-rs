@@ -3,7 +3,6 @@ use core::{
     fmt,
     hash::{Hash, Hasher},
 };
-use num_traits::Float;
 use odu_types::HasType;
 
 // masks for the parts of the IEEE 754 float
@@ -41,28 +40,16 @@ impl PartialEq for Number {
             (Number::I64(l), Number::I64(r)) => l == r,
             (Number::U64(l), Number::U64(r)) => l == r,
             (Number::F32(l), Number::F32(r)) => {
-                if l.is_nan() {
-                    r.is_nan()
-                } else {
-                    l == r
-                }
+                floating::eq(l, r)
             }
             (Number::F64(l), Number::F64(r)) => {
-                if l.is_nan() {
-                    r.is_nan()
-                } else {
-                    l == r
-                }
+                floating::eq(l, r)
             }
             (l, r) => {
                 if l.is_float() && r.is_float() {
                     let l = l.as_f64();
                     let r = r.as_f64();
-                    if l.is_nan() {
-                        r.is_nan()
-                    } else {
-                        l == r
-                    }
+                    floating::eq(l, r)
                 } else {
                     l.as_u64() == r.as_u64()
                 }
@@ -91,49 +78,16 @@ impl Ord for Number {
             (Number::I64(l), Number::I64(r)) => l.cmp(r),
             (Number::U64(l), Number::U64(r)) => l.cmp(r),
             (Number::F32(l), Number::F32(r)) => {
-                if l.is_nan() {
-                    if r.is_nan() {
-                        Ordering::Equal
-                    } else {
-                        Ordering::Greater
-                    }
-                } else {
-                    match l.partial_cmp(r) {
-                        Some(o) => o,
-                        None => Ordering::Less,
-                    }
-                }
+                floating::cmp(l, r)
             }
             (Number::F64(l), Number::F64(r)) => {
-                if l.is_nan() {
-                    if r.is_nan() {
-                        Ordering::Equal
-                    } else {
-                        Ordering::Greater
-                    }
-                } else {
-                    match l.partial_cmp(r) {
-                        Some(o) => o,
-                        None => Ordering::Less,
-                    }
-                }
+                floating::cmp(l, r)
             }
             (l, r) => {
                 if l.is_float() && r.is_float() {
                     let l = l.as_f64();
                     let r = r.as_f64();
-                    if l.is_nan() {
-                        if r.is_nan() {
-                            Ordering::Equal
-                        } else {
-                            Ordering::Greater
-                        }
-                    } else {
-                        match l.partial_cmp(&r) {
-                            Some(o) => o,
-                            None => Ordering::Less,
-                        }
-                    }
+                    floating::cmp(l, r)
                 } else {
                     l.as_u64().cmp(&r.as_u64())
                 }
@@ -154,43 +108,15 @@ impl Hash for Number {
             Number::I64(i) => i.hash(state),
             Number::U64(i) => i.hash(state),
             Number::F32(f) => {
-                if f.is_nan() {
-                    hash_float(&f32::nan(), state)
-                } else {
-                    hash_float(f, state)
-                }
+                floating::hash(f, state)
             }
             Number::F64(f) => {
-                if f.is_nan() {
-                    hash_float(&f64::nan(), state)
-                } else {
-                    hash_float(f, state)
-                }
+                floating::hash(f, state)
             }
         }
     }
 }
 
-#[inline]
-fn hash_float<F: Float, H: Hasher>(f: &F, state: &mut H) {
-    raw_double_bits(f).hash(state);
-}
-
-#[inline]
-fn raw_double_bits<F: Float>(f: &F) -> u64 {
-    if f.is_nan() {
-        return CANONICAL_NAN_BITS;
-    }
-
-    let (man, exp, sign) = f.integer_decode();
-    if man == 0 {
-        return CANONICAL_ZERO_BITS;
-    }
-
-    let exp_u64 = exp as u16 as u64;
-    let sign_u64 = (sign > 0) as u64;
-    (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
-}
 
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
