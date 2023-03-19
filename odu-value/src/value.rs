@@ -53,6 +53,7 @@ pub enum Value {
     List(List),
     Map(Map),
     Bytes(Bytes),
+
     None,
 }
 
@@ -61,13 +62,15 @@ impl Value {
         matches!(self, Value::Number(_))
     }
 
-    // is_method!(is_number, Number);
     is_method!(is_string, String);
     is_method!(is_bytes, Bytes);
     is_method!(is_bool, Bool);
     is_method!(is_list, List);
     is_method!(is_map, Map);
     is_method!(is_char, Char);
+    // is_method!(is_time, Time);
+    // is_method!(is_date, Date);
+    // is_method!(is_datetime, DateTime);
 
     pub fn is_none(&self) -> bool {
         matches!(self, Value::None)
@@ -137,20 +140,20 @@ impl AsMut<Value> for Value {
     }
 }
 
-impl HasType for Value {
-    fn typed(&self) -> odu_types::Type {
-        use odu_types::{Primitive, Type};
-        match self {
-            Value::Bool(_) => Primitive::Bool.into(),
-            Value::Bytes(_) => Primitive::Bytes.into(),
-            Value::Char(_) => Primitive::U8.into(),
-            Value::List(l) => l.typed(),
-            Value::Map(m) => m.typed(),
-            Value::None => Type::Optional(odu_types::Optional {
-                kind: Type::Primitive(Primitive::Bytes).into(),
-            }),
-            Value::String(_) => Primitive::String.into(),
-            Value::Number(n) => n.typed(),
-        }
-    }
-}
+// impl HasType for Value {
+//     fn typed(&self) -> odu_types::Type {
+//         use odu_types::{Primitive, Type};
+//         match self {
+//             Value::Bool(_) => Primitive::Bool.into(),
+//             Value::Bytes(_) => Primitive::Bytes.into(),
+//             Value::Char(_) => Primitive::U8.into(),
+//             Value::List(l) => l.typed(),
+//             Value::Map(m) => m.typed(),
+//             Value::None => Type::Optional(odu_types::Optional {
+//                 kind: Type::Primitive(Primitive::Bytes).into(),
+//             }),
+//             Value::String(_) => Primitive::String.into(),
+//             Value::Number(n) => n.typed(),
+//         }
+//     }
+// }

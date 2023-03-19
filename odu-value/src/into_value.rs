@@ -1,6 +1,6 @@
 #[cfg(not(feature = "ord"))]
 use super::object::HashMap;
-use crate::{List, Map, Value};
+use crate::{List, Map, MapImpl, Value};
 use alloc::{
     string::{String, ToString},
     vec::Vec,
@@ -45,17 +45,8 @@ into_value!(
     bool => Bool,
     Vec<Value> => List,
     List => List,
-    Map => Map
-);
-
-#[cfg(not(feature = "ord"))]
-into_value!(
-    HashMap<String, Value> => Map
-);
-
-#[cfg(feature = "ord")]
-into_value!(
-    alloc::collections::BTreeMap<String, Value> => Map
+    Map => Map,
+    MapImpl => Map
 );
 
 into_value!(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);

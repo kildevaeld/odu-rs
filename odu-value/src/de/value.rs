@@ -1,5 +1,5 @@
 use super::number;
-use crate::{value::Value, HashMap, Map};
+use crate::{value::Value, Map, MapImpl};
 #[cfg(not(feature = "std"))]
 use alloc::{
     borrow::ToOwned,
@@ -313,7 +313,7 @@ impl<'de> de::Visitor<'de> for ValueVisitor {
     }
 
     fn visit_map<V: de::MapAccess<'de>>(self, mut visitor: V) -> Result<Value, V::Error> {
-        let mut values = HashMap::new();
+        let mut values = MapImpl::new();
         while let Some((key, value)) = visitor.next_entry()? {
             values.insert(key, value);
         }

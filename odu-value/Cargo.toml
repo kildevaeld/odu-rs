@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = []
+default = ["serde"]
 std = ["bytes/std", "serde?/std"]
-serde = ["dep:serde", "hashbrown/serde"]
+serde = ["dep:serde", "hashbrown/serde", "chrono/serde"]
 ord = []
 
 [dependencies]
@@ -22,4 +22,4 @@ serde = { version = "1", default-features = false, features = [
 
 floating = { path = "../floating" }
 
-# chrono = { version = "0.4", optional = true}
+chrono = { version = "0.4" }

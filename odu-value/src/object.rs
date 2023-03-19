@@ -10,13 +10,10 @@ pub type HashBuilder = hashbrown::hash_map::DefaultHashBuilder;
 #[cfg(feature = "std")]
 pub type HashBuilder = std::collections::hash_map::RandomState;
 
-#[cfg(not(feature = "ord"))]
-pub type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V, HashBuilder>;
-
 pub type HashMap<K, V> = StdHashMap<K, V, HashBuilder>;
 
 #[cfg(not(feature = "ord"))]
-type MapImpl = HashMap<String, Value>;
+pub(crate) type MapImpl = HashMap<String, Value>;
 #[cfg(not(feature = "ord"))]
 type Iter<'a, K, V> = hashbrown::hash_map::Iter<'a, K, V>;
 #[cfg(not(feature = "ord"))]
@@ -24,10 +21,10 @@ type IntoIter<K, V> = hashbrown::hash_map::IntoIter<K, V>;
 #[cfg(not(feature = "ord"))]
 type IterMut<'a, K, V> = hashbrown::hash_map::IterMut<'a, K, V>;
 #[cfg(not(feature = "ord"))]
-type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V>;
+type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V, HashBuilder>;
 
 #[cfg(feature = "ord")]
-type MapImpl = alloc::collections::BTreeMap<String, Value>;
+pub(crate) type MapImpl = alloc::collections::BTreeMap<String, Value>;
 #[cfg(feature = "ord")]
 type Iter<'a, K, V> = alloc::collections::btree_map::Iter<'a, K, V>;
 #[cfg(feature = "ord")]
