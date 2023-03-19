@@ -1,6 +1,7 @@
 use crate::{list::List, number::Number, object::Map, time::Time};
 use alloc::string::{String, ToString};
 use bytes::Bytes;
+use odu_types::HasType;
 
 macro_rules! is_method {
     ($check: ident, $ty: ident) => {
@@ -150,20 +151,21 @@ impl AsMut<Value> for Value {
     }
 }
 
-// impl HasType for Value {
-//     fn typed(&self) -> odu_types::Type {
-//         use odu_types::{Primitive, Type};
-//         match self {
-//             Value::Bool(_) => Primitive::Bool.into(),
-//             Value::Bytes(_) => Primitive::Bytes.into(),
-//             Value::Char(_) => Primitive::U8.into(),
-//             Value::List(l) => l.typed(),
-//             Value::Map(m) => m.typed(),
-//             Value::None => Type::Optional(odu_types::Optional {
-//                 kind: Type::Primitive(Primitive::Bytes).into(),
-//             }),
-//             Value::String(_) => Primitive::String.into(),
-//             Value::Number(n) => n.typed(),
-//         }
-//     }
-// }
+impl HasType for Value {
+    fn typed(&self) -> odu_types::Type {
+        use odu_types::{Primitive, Type};
+        match self {
+            Value::Bool(_) => Primitive::Bool.into(),
+            Value::Bytes(_) => Primitive::Bytes.into(),
+            Value::Char(_) => Primitive::U8.into(),
+            Value::List(l) => l.typed(),
+            Value::Map(m) => m.typed(),
+            Value::None => Type::Optional(odu_types::Optional {
+                kind: Type::Primitive(Primitive::Bytes).into(),
+            }),
+            Value::String(_) => Primitive::String.into(),
+            Value::Number(n) => n.typed(),
+            Value::Time(t) => t.typed(),
+        }
+    }
+}

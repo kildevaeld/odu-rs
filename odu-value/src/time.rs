@@ -1,5 +1,6 @@
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
 use core::fmt;
+use odu_types::HasType;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Time {
@@ -64,5 +65,16 @@ impl From<NaiveTime> for Time {
 impl<T: TimeZone> From<DateTime<T>> for Time {
     fn from(value: DateTime<T>) -> Self {
         Time::DateTime(value.naive_utc())
+    }
+}
+
+impl HasType for Time {
+    fn typed(&self) -> odu_types::Type {
+        match self {
+            Time::Date(_) => odu_types::Primitive::Date,
+            Time::DateTime(_) => odu_types::Primitive::DateTime,
+            Time::Time(_) => odu_types::Primitive::Time,
+        }
+        .into()
     }
 }
