@@ -3,6 +3,7 @@ use odu_types::HasType;
 
 use crate::value::Value;
 
+#[cfg_attr(feature = "ord", derive(Hash, PartialOrd, Ord))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct List {
     pub(crate) v: Vec<Value>,
@@ -35,6 +36,10 @@ impl List {
 
     pub fn iter(&self) -> core::slice::Iter<'_, Value> {
         self.v.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> core::slice::IterMut<'_, Value> {
+        self.v.iter_mut()
     }
 }
 

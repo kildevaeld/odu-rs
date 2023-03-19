@@ -3,11 +3,6 @@ use alloc::string::String;
 use bytes::Bytes;
 use odu_types::HasType;
 
-// #[cfg(feature = "serde")]
-// use super::de::DeserializerError;
-// #[cfg(feature = "serde")]
-// use serde::de::Deserialize;
-
 macro_rules! is_method {
     ($check: ident, $ty: ident) => {
         pub fn $check(&self) -> bool {
@@ -48,6 +43,7 @@ macro_rules! as_method {
     };
 }
 
+#[cfg_attr(feature = "ord", derive(Hash, PartialOrd, Ord))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     Bool(bool),
@@ -107,6 +103,20 @@ impl Value {
         }
     }
 
+    pub fn get<S: AsRef<str>>(&self, field: S) -> Option<&Value> {
+        match self.as_map() {
+            Some(map) => map.get(field),
+            None => None,
+        }
+    }
+
+    pub fn get_mut<S: AsRef<str>>(&mut self, field: S) -> Option<&mut Value> {
+        match self.as_map_mut() {
+            Some(map) => map.get_mut(field),
+            None => None,
+        }
+    }
+
     pub fn insert<S: AsRef<str>, V: Into<Value>>(&mut self, field: S, value: V) -> Option<Value> {
         match self.as_map_mut() {
             Some(map) => map.insert(field.as_ref(), value.into()),
@@ -117,6 +127,12 @@ impl Value {
 
 impl AsRef<Value> for Value {
     fn as_ref(&self) -> &Value {
+        self
+    }
+}
+
+impl AsMut<Value> for Value {
+    fn as_mut(&mut self) -> &mut Value {
         self
     }
 }

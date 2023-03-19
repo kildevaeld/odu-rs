@@ -1,10 +1,7 @@
 use crate::value::Value;
 use alloc::string::{String, ToString};
 use core::ops;
-use hashbrown::{
-    hash_map::{IntoIter, Iter, IterMut},
-    HashMap as StdHashMap,
-};
+use hashbrown::HashMap as StdHashMap;
 use odu_types::HasType;
 
 #[cfg(not(feature = "std"))]
@@ -13,19 +10,44 @@ pub type HashBuilder = hashbrown::hash_map::DefaultHashBuilder;
 #[cfg(feature = "std")]
 pub type HashBuilder = std::collections::hash_map::RandomState;
 
+#[cfg(not(feature = "ord"))]
 pub type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V, HashBuilder>;
 
 pub type HashMap<K, V> = StdHashMap<K, V, HashBuilder>;
 
+#[cfg(not(feature = "ord"))]
+type MapImpl = HashMap<String, Value>;
+#[cfg(not(feature = "ord"))]
+type Iter<'a, K, V> = hashbrown::hash_map::Iter<'a, K, V>;
+#[cfg(not(feature = "ord"))]
+type IntoIter<K, V> = hashbrown::hash_map::IntoIter<K, V>;
+#[cfg(not(feature = "ord"))]
+type IterMut<'a, K, V> = hashbrown::hash_map::IterMut<'a, K, V>;
+#[cfg(not(feature = "ord"))]
+type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V>;
+
+#[cfg(feature = "ord")]
+type MapImpl = alloc::collections::BTreeMap<String, Value>;
+#[cfg(feature = "ord")]
+type Iter<'a, K, V> = alloc::collections::btree_map::Iter<'a, K, V>;
+#[cfg(feature = "ord")]
+type IntoIter<K, V> = alloc::collections::btree_map::IntoIter<K, V>;
+#[cfg(feature = "ord")]
+type IterMut<'a, K, V> = alloc::collections::btree_map::IterMut<'a, K, V>;
+#[cfg(feature = "ord")]
+type Entry<'a, K, V> = alloc::collections::btree_map::Entry<'a, K, V>;
+
+#[cfg_attr(feature = "ord", derive(Hash, PartialOrd, Ord))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Map {
-    pub(crate) inner: StdHashMap<String, Value, HashBuilder>,
+    pub(crate) inner: MapImpl,
 }
 
 impl Map {
+    #[cfg(not(feature = "ord"))]
     pub fn with_capacity(len: usize) -> Map {
         Map {
-            inner: HashMap::with_capacity(len),
+            inner: MapImpl::with_capacity(len),
         }
     }
 
@@ -123,8 +145,16 @@ impl<'a> ops::IndexMut<&'a str> for Map {
     }
 }
 
+#[cfg(not(feature = "ord"))]
 impl From<StdHashMap<String, Value, HashBuilder>> for Map {
     fn from(map: StdHashMap<String, Value, HashBuilder>) -> Map {
+        Map { inner: map }
+    }
+}
+
+#[cfg(feature = "ord")]
+impl From<alloc::collections::BTreeMap<String, Value>> for Map {
+    fn from(map: alloc::collections::BTreeMap<String, Value>) -> Map {
         Map { inner: map }
     }
 }
