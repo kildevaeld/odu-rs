@@ -1,7 +1,6 @@
-use crate::{list::List, number::Number, object::Map};
-use alloc::string::String;
+use crate::{list::List, number::Number, object::Map, time::Time};
+use alloc::string::{String, ToString};
 use bytes::Bytes;
-use odu_types::HasType;
 
 macro_rules! is_method {
     ($check: ident, $ty: ident) => {
@@ -53,7 +52,7 @@ pub enum Value {
     List(List),
     Map(Map),
     Bytes(Bytes),
-
+    Time(Time),
     None,
 }
 
@@ -68,9 +67,7 @@ impl Value {
     is_method!(is_list, List);
     is_method!(is_map, Map);
     is_method!(is_char, Char);
-    // is_method!(is_time, Time);
-    // is_method!(is_date, Date);
-    // is_method!(is_datetime, DateTime);
+    is_method!(is_time, Time);
 
     pub fn is_none(&self) -> bool {
         matches!(self, Value::None)
@@ -82,7 +79,8 @@ impl Value {
     as_method!(as_bool, as_bool_mut, Bool, bool);
     as_method!(as_list, as_list_mut, List, List);
     as_method!(as_map, as_map_mut, Map, Map);
-    as_method!(as_char, as_char_as, Char, char);
+    as_method!(as_char, as_char_mut, Char, char);
+    as_method!(as_time, as_time_mut, Time, Time);
 
     into_method!(into_string, String, String);
     into_method!(into_bytes, Bytes, Bytes);
@@ -91,6 +89,7 @@ impl Value {
     into_method!(into_map, Map, Map);
     into_method!(into_char, Char, char);
     into_method!(into_number, Number, Number);
+    into_method!(into_time, Time, Time);
 
     pub fn into_option(self) -> Option<Value> {
         match self {
@@ -124,6 +123,17 @@ impl Value {
         match self.as_map_mut() {
             Some(map) => map.insert(field.as_ref(), value.into()),
             None => None,
+        }
+    }
+
+    pub fn to_string(&self) -> Option<String> {
+        match self {
+            Value::Bool(b) => Some(b.to_string()),
+            Value::String(s) => Some(s.clone()),
+            Value::Char(c) => Some(c.to_string()),
+            Value::Number(n) => Some(n.to_string()),
+            Value::Time(t) => Some(t.to_string()),
+            _ => None,
         }
     }
 }

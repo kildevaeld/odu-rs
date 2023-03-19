@@ -1,11 +1,10 @@
-#[cfg(not(feature = "ord"))]
-use super::object::HashMap;
 use crate::{List, Map, MapImpl, Value};
 use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
 use bytes::Bytes;
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 macro_rules! into_value {
     ($($ty: ty => $val: ident),*) => {
@@ -23,7 +22,7 @@ macro_rules! into_value {
             }
         )*
     };
-    ($($ty: ty),*) => {
+    (@number $($ty: ty),*) => {
         $(
             impl From<$ty> for Value {
                 fn from(from: $ty) -> Value {
@@ -34,6 +33,21 @@ macro_rules! into_value {
             impl<'a> From<&'a $ty> for Value {
                 fn from(from: &'a $ty) -> Value {
                     Value::Number((*from).into())
+                }
+            }
+        )*
+    };
+    (@time $($ty: ty),*) => {
+        $(
+            impl From<$ty> for Value {
+                fn from(from: $ty) -> Value {
+                    Value::Time(from.into())
+                }
+            }
+
+            impl<'a> From<&'a $ty> for Value {
+                fn from(from: &'a $ty) -> Value {
+                    Value::Time((*from).into())
                 }
             }
         )*
@@ -49,7 +63,9 @@ into_value!(
     MapImpl => Map
 );
 
-into_value!(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
+into_value!(@number i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
+
+into_value!(@time NaiveDate, NaiveDateTime, NaiveTime);
 
 impl<'a> From<&'a str> for Value {
     fn from(from: &'a str) -> Value {

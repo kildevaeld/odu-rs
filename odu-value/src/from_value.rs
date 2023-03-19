@@ -1,6 +1,7 @@
-use crate::{List, Map, Number, Value};
+use crate::{List, Map, Number, Time, Value};
 use alloc::string::String;
 use bytes::Bytes;
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 #[derive(Debug, Clone)]
 pub enum FromValueErr<'a> {
@@ -65,7 +66,7 @@ macro_rules! from_impl {
             }
         }
     };
-    ($($type: ty => $method: ident),*) => {
+    (@number $($type: ty => $method: ident),*) => {
         $(
             impl TryFrom<Value> for $type {
                 type Error = FromValueErr<'static>;
@@ -87,7 +88,30 @@ macro_rules! from_impl {
                 }
             }
         )*
-    }
+    };
+    (@time $($type: ty => $method: ident),*) => {
+        $(
+            impl TryFrom<Value> for $type {
+                type Error = FromValueErr<'static>;
+                fn try_from(from: Value) -> Result<Self, Self::Error> {
+                    match from.into_time() {
+                        Ok(n) => n.$method().ok_or_else(|| FromValueErr::Value(Value::Time(n))),
+                        Err(err) => Err(FromValueErr::Value(err)),
+                    }
+                }
+            }
+
+            impl<'a> TryFrom<&'a Value> for $type {
+                type Error = FromValueErr<'a>;
+                fn try_from(from: &'a Value) -> Result<Self, Self::Error> {
+                    match from.as_time() {
+                        Some(n) => n.$method().ok_or_else(|| FromValueErr::Value(Value::Time(*n))),
+                        None => Err(FromValueErr::Ref(from)),
+                    }
+                }
+            }
+        )*
+    };
 }
 
 from_impl!(String, into_string, as_string, as_string_mut);
@@ -96,8 +120,10 @@ from_impl!(bool, into_bool, as_bool, as_bool_mut);
 from_impl!(Number, into_number, as_number, as_number_mut);
 from_impl!(Map, into_map, as_map, as_map_mut);
 from_impl!(List, into_list, as_list, as_list_mut);
+from_impl!(Time, into_time, as_time, as_time_mut);
 
 from_impl!(
+    @number
     u8 => as_u8,
     i8 => as_i8,
     u16 => as_u16,
@@ -108,6 +134,13 @@ from_impl!(
     i64 => as_i64,
     f32 => as_f32,
     f64 => as_f64
+);
+
+from_impl!(
+    @time
+    NaiveDate => as_date,
+    NaiveDateTime => as_datetime,
+    NaiveTime => as_time
 );
 
 impl<'a> TryFrom<&'a Value> for &'a str {

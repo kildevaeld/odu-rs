@@ -1,4 +1,4 @@
-use super::number;
+use super::{number, time};
 use crate::{value::Value, Map, MapImpl};
 #[cfg(not(feature = "std"))]
 use alloc::{
@@ -386,10 +386,7 @@ where
                 },
             ))),
             Value::Bytes(v) => visitor.visit_byte_buf(v.to_vec()),
-            #[cfg(feature = "datetime")]
-            Value::Date(v) => visitor.visit_string(v.to_string()),
-            #[cfg(feature = "datetime")]
-            Value::DateTime(v) => visitor.visit_string(v.to_string()),
+            Value::Time(time) => time::TimeDeserializer::<E>::new(time).deserialize_any(visitor),
         }
     }
 
