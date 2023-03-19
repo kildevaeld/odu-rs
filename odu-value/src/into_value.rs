@@ -3,6 +3,7 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
+use bytes::Bytes;
 use hashbrown::HashMap;
 
 macro_rules! into_value {
@@ -47,11 +48,29 @@ into_value!(
     HashMap<String, Value, HashBuilder> => Map
 );
 
-into_value!(i8, u8, i16, u16, i32, u32, i64, u64);
+into_value!(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
 
 impl<'a> From<&'a str> for Value {
     fn from(from: &'a str) -> Value {
         Value::String(from.to_string())
+    }
+}
+
+impl From<Bytes> for Value {
+    fn from(value: Bytes) -> Self {
+        Value::Bytes(value)
+    }
+}
+
+impl From<Vec<u8>> for Value {
+    fn from(value: Vec<u8>) -> Self {
+        Value::Bytes(value.into())
+    }
+}
+
+impl<'a> From<&'a [u8]> for Value {
+    fn from(value: &'a [u8]) -> Self {
+        Value::Bytes(value.to_vec().into())
     }
 }
 
