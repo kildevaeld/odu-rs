@@ -10,5 +10,5 @@ derive = ["odu-macros"]
 
 [dependencies]
 odu-macros = { path = "../odu-macros", optional = true}
-serde = { version = "1", default-features = false, optional = true}
+serde = { version = "1", default-features = false, features = ["derive", "alloc"], optional = true}
 bytes = { version = "1", default-features = false}

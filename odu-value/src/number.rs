@@ -1,18 +1,8 @@
 use core::{
-    cmp::Ordering,
     fmt,
     hash::{Hash, Hasher},
 };
 use odu_types::HasType;
-
-// masks for the parts of the IEEE 754 float
-const SIGN_MASK: u64 = 0x8000000000000000u64;
-const EXP_MASK: u64 = 0x7ff0000000000000u64;
-const MAN_MASK: u64 = 0x000fffffffffffffu64;
-
-// canonical raw bit patterns (for hashing)
-const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000u64;
-const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Number {
@@ -39,12 +29,8 @@ impl PartialEq for Number {
             (Number::U32(l), Number::U32(r)) => l == r,
             (Number::I64(l), Number::I64(r)) => l == r,
             (Number::U64(l), Number::U64(r)) => l == r,
-            (Number::F32(l), Number::F32(r)) => {
-                floating::eq(l, r)
-            }
-            (Number::F64(l), Number::F64(r)) => {
-                floating::eq(l, r)
-            }
+            (Number::F32(l), Number::F32(r)) => floating::eq(l, r),
+            (Number::F64(l), Number::F64(r)) => floating::eq(l, r),
             (l, r) => {
                 if l.is_float() && r.is_float() {
                     let l = l.as_f64();
@@ -77,12 +63,8 @@ impl Ord for Number {
             (Number::U32(l), Number::U32(r)) => l.cmp(r),
             (Number::I64(l), Number::I64(r)) => l.cmp(r),
             (Number::U64(l), Number::U64(r)) => l.cmp(r),
-            (Number::F32(l), Number::F32(r)) => {
-                floating::cmp(l, r)
-            }
-            (Number::F64(l), Number::F64(r)) => {
-                floating::cmp(l, r)
-            }
+            (Number::F32(l), Number::F32(r)) => floating::cmp(l, r),
+            (Number::F64(l), Number::F64(r)) => floating::cmp(l, r),
             (l, r) => {
                 if l.is_float() && r.is_float() {
                     let l = l.as_f64();
@@ -107,16 +89,11 @@ impl Hash for Number {
             Number::U32(i) => i.hash(state),
             Number::I64(i) => i.hash(state),
             Number::U64(i) => i.hash(state),
-            Number::F32(f) => {
-                floating::hash(f, state)
-            }
-            Number::F64(f) => {
-                floating::hash(f, state)
-            }
+            Number::F32(f) => floating::hash(f, state),
+            Number::F64(f) => floating::hash(f, state),
         }
     }
 }
-
 
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
