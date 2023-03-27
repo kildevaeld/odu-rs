@@ -39,7 +39,7 @@ impl Parameters {
             None => return Ok(()),
         };
 
-        let arg_types = args.types();
+        let _arg_types = args.types();
 
         for (idx, param) in params.iter().enumerate() {
             let arg = match args.get(idx) {

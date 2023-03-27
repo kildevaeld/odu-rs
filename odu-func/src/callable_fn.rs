@@ -17,6 +17,21 @@ pub struct CallableFunc<F, A> {
     _args: PhantomData<A>,
 }
 
+impl<F: Clone, A> Clone for CallableFunc<F, A> {
+    fn clone(&self) -> Self {
+        CallableFunc {
+            func: self.func.clone(),
+            _args: PhantomData,
+        }
+    }
+}
+
+impl<F: Copy, A> Copy for CallableFunc<F, A> {}
+
+unsafe impl<F: Send, A> Send for CallableFunc<F, A> {}
+
+unsafe impl<F: Sync, A> Sync for CallableFunc<F, A> {}
+
 impl<F, A> CallableFunc<F, A>
 where
     for<'a> A: FromArguments<'a>,

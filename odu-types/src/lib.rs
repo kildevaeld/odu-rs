@@ -30,6 +30,9 @@ pub enum Primitive {
     F64,
     String,
     Bytes,
+    Date,
+    DateTime,
+    Time,
     Void,
 }
 

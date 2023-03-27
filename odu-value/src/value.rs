@@ -1,12 +1,7 @@
-use crate::{list::List, number::Number, object::Map};
-use alloc::string::String;
+use crate::{list::List, number::Number, object::Map, time::Time};
+use alloc::string::{String, ToString};
 use bytes::Bytes;
 use odu_types::HasType;
-
-// #[cfg(feature = "serde")]
-// use super::de::DeserializerError;
-// #[cfg(feature = "serde")]
-// use serde::de::Deserialize;
 
 macro_rules! is_method {
     ($check: ident, $ty: ident) => {
@@ -48,6 +43,7 @@ macro_rules! as_method {
     };
 }
 
+#[cfg_attr(feature = "ord", derive(Hash, PartialOrd, Ord))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     Bool(bool),
@@ -57,6 +53,7 @@ pub enum Value {
     List(List),
     Map(Map),
     Bytes(Bytes),
+    Time(Time),
     None,
 }
 
@@ -65,13 +62,13 @@ impl Value {
         matches!(self, Value::Number(_))
     }
 
-    // is_method!(is_number, Number);
     is_method!(is_string, String);
     is_method!(is_bytes, Bytes);
     is_method!(is_bool, Bool);
     is_method!(is_list, List);
     is_method!(is_map, Map);
     is_method!(is_char, Char);
+    is_method!(is_time, Time);
 
     pub fn is_none(&self) -> bool {
         matches!(self, Value::None)
@@ -83,7 +80,8 @@ impl Value {
     as_method!(as_bool, as_bool_mut, Bool, bool);
     as_method!(as_list, as_list_mut, List, List);
     as_method!(as_map, as_map_mut, Map, Map);
-    as_method!(as_char, as_char_as, Char, char);
+    as_method!(as_char, as_char_mut, Char, char);
+    as_method!(as_time, as_time_mut, Time, Time);
 
     into_method!(into_string, String, String);
     into_method!(into_bytes, Bytes, Bytes);
@@ -92,6 +90,7 @@ impl Value {
     into_method!(into_map, Map, Map);
     into_method!(into_char, Char, char);
     into_method!(into_number, Number, Number);
+    into_method!(into_time, Time, Time);
 
     pub fn into_option(self) -> Option<Value> {
         match self {
@@ -107,16 +106,47 @@ impl Value {
         }
     }
 
+    pub fn get<S: AsRef<str>>(&self, field: S) -> Option<&Value> {
+        match self.as_map() {
+            Some(map) => map.get(field),
+            None => None,
+        }
+    }
+
+    pub fn get_mut<S: AsRef<str>>(&mut self, field: S) -> Option<&mut Value> {
+        match self.as_map_mut() {
+            Some(map) => map.get_mut(field),
+            None => None,
+        }
+    }
+
     pub fn insert<S: AsRef<str>, V: Into<Value>>(&mut self, field: S, value: V) -> Option<Value> {
         match self.as_map_mut() {
             Some(map) => map.insert(field.as_ref(), value.into()),
             None => None,
         }
     }
+
+    pub fn to_string(&self) -> Option<String> {
+        match self {
+            Value::Bool(b) => Some(b.to_string()),
+            Value::String(s) => Some(s.clone()),
+            Value::Char(c) => Some(c.to_string()),
+            Value::Number(n) => Some(n.to_string()),
+            Value::Time(t) => Some(t.to_string()),
+            _ => None,
+        }
+    }
 }
 
 impl AsRef<Value> for Value {
     fn as_ref(&self) -> &Value {
+        self
+    }
+}
+
+impl AsMut<Value> for Value {
+    fn as_mut(&mut self) -> &mut Value {
         self
     }
 }
@@ -135,6 +165,7 @@ impl HasType for Value {
             }),
             Value::String(_) => Primitive::String.into(),
             Value::Number(n) => n.typed(),
+            Value::Time(t) => t.typed(),
         }
     }
 }

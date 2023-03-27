@@ -1,4 +1,4 @@
-use crate::{number::Number, HashMap, List, Map};
+use crate::{number::Number, time::Time, HashMap, List, Map};
 
 use super::value::Value;
 #[cfg(not(feature = "std"))]
@@ -44,10 +44,7 @@ impl ser::Serialize for Value {
             Value::List(ref v) => v.serialize(s),
             Value::Map(ref v) => v.serialize(s),
             Value::Bytes(ref v) => s.serialize_bytes(v),
-            #[cfg(feature = "datetime")]
-            Value::Date(v) => v.serialize(s),
-            #[cfg(feature = "datetime")]
-            Value::DateTime(v) => v.serialize(s),
+            Value::Time(ref m) => m.serialize(s),
         }
     }
 }
@@ -69,6 +66,15 @@ impl ser::Serialize for Number {
             Number::F32(v) => s.serialize_f32(v),
             Number::F64(v) => s.serialize_f64(v),
         }
+    }
+}
+
+impl ser::Serialize for Time {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
     }
 }
 

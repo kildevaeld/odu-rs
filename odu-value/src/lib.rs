@@ -9,6 +9,7 @@ mod index;
 mod list;
 mod number;
 mod object;
+mod time;
 mod value;
 
 mod from_value;
@@ -20,7 +21,7 @@ mod merge;
 
 pub use self::{
     from_value::*, index::Index, into_value::*, list::*, macros::*, merge::*, number::*, object::*,
-    value::*,
+    time::Time, value::*,
 };
 
 #[cfg(feature = "serde")]
