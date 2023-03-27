@@ -1,30 +1,18 @@
 use odu_types::Type;
 use odu_value::Value;
-use sea_orm::EntityTrait;
+use sea_orm::{ConnectOptions, EntityTrait};
 
 mod entities;
+mod user;
 
-pub struct User {}
+pub struct Database(sea_orm::Database);
 
-pub trait Projects {
-    fn find(&self, user: &User);
-    fn find_one(&self, user: &User);
-}
-
-pub struct ResourceId;
-
-pub struct ResourceType {
-    name: String,
-    bluepint: Type,
-}
-
-pub struct Resource {
-    resource_type: ResourceId,
-    value: Value,
-}
-
-pub async fn open() {
-    let db = sea_orm::Database::connect("sqlite:./test.sqlite")
-        .await
-        .expect("msk");
+impl Database {
+    pub async fn open<C>(connect: C) -> Result<Database, sea_orm::error::DbErr>
+    where
+        C: Into<ConnectOptions>,
+    {
+        let db = sea_orm::Database::connect(connect).await?;
+        Ok(Database(db))
+    }
 }
