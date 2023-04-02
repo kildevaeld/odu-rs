@@ -1,7 +1,0 @@
-# Universal Data Input
-
-```
-
-
-
-```

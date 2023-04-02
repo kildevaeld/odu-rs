@@ -66,13 +66,16 @@ macro_rules! from_impl {
             }
         }
     };
-    (@number $($type: ty => $method: ident),*) => {
+    (@number $($type: ty => $variant: ident),*) => {
         $(
             impl TryFrom<Value> for $type {
                 type Error = FromValueErr<'static>;
                 fn try_from(from: Value) -> Result<Self, Self::Error> {
                     match from.into_number() {
-                        Ok(n) => Ok(n.$method()),
+                        Ok(n) => match n {
+                            Number::$variant(n) => Ok(n),
+                            n => Err(FromValueErr::Value(Value::Number(n)))
+                        },
                         Err(err) => Err(FromValueErr::Value(err)),
                     }
                 }
@@ -82,8 +85,8 @@ macro_rules! from_impl {
                 type Error = FromValueErr<'a>;
                 fn try_from(from: &'a Value) -> Result<Self, Self::Error> {
                     match from.as_number() {
-                        Some(n) => Ok(n.$method()),
-                        None => Err(FromValueErr::Ref(from)),
+                        Some(Number::$variant(n)) => Ok(*n),
+                        _ => Err(FromValueErr::Ref(from)),
                     }
                 }
             }
@@ -124,16 +127,16 @@ from_impl!(Time, into_time, as_time, as_time_mut);
 
 from_impl!(
     @number
-    u8 => as_u8,
-    i8 => as_i8,
-    u16 => as_u16,
-    i16 => as_i16,
-    u32 => as_u32,
-    i32 => as_i32,
-    u64 => as_u64,
-    i64 => as_i64,
-    f32 => as_f32,
-    f64 => as_f64
+    u8 => U8,
+    i8 => I8,
+    u16 => U16,
+    i16 => I16,
+    u32 => U32,
+    i32 => I32,
+    u64 => U64,
+    i64 => I64,
+    f32 => F32,
+    f64 => F64
 );
 
 from_impl!(

@@ -1,7 +1,9 @@
 #![no_std]
 
-use core::{mem, cmp::Ordering, hash::{Hasher, Hash}};
-
+use core::{
+    cmp::Ordering,
+    hash::{Hash, Hasher},
+};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -12,11 +14,8 @@ const MAN_MASK: u64 = 0x000fffffffffffffu64;
 const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000u64;
 const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 
-
 fn integer_decode_f32(f: f32) -> (u64, i16, i8) {
-    // Safety: this identical to the implementation of f32::to_bits(),
-    // which is only available starting at Rust 1.20
-    let bits: u32 = unsafe { mem::transmute(f) };
+    let bits: u32 = f.to_bits();
     let sign: i8 = if bits >> 31 == 0 { 1 } else { -1 };
     let mut exponent: i16 = ((bits >> 23) & 0xff) as i16;
     let mantissa = if exponent == 0 {
@@ -30,9 +29,7 @@ fn integer_decode_f32(f: f32) -> (u64, i16, i8) {
 }
 
 fn integer_decode_f64(f: f64) -> (u64, i16, i8) {
-    // Safety: this identical to the implementation of f64::to_bits(),
-    // which is only available starting at Rust 1.20
-    let bits: u64 = unsafe { mem::transmute(f) };
+    let bits: u64 = f.to_bits();
     let sign: i8 = if bits >> 63 == 0 { 1 } else { -1 };
     let mut exponent: i16 = ((bits >> 52) & 0x7ff) as i16;
     let mantissa = if exponent == 0 {
@@ -44,7 +41,6 @@ fn integer_decode_f64(f: f64) -> (u64, i16, i8) {
     exponent -= 1023 + 52;
     (mantissa, exponent, sign)
 }
-
 
 mod sealed {
     pub trait Sealed {}
@@ -61,21 +57,18 @@ pub trait Float: sealed::Sealed + PartialOrd {
     fn is_nan(&self) -> bool;
 }
 
-
 impl Float for f32 {
-    
     #[inline]
     fn integer_decode(&self) -> (u64, i16, i8) {
         integer_decode_f32(*self)
     }
 
-
     #[inline]
+    #[allow(clippy::eq_op)]
     fn is_nan(&self) -> bool {
         self != self
     }
 }
-
 
 impl Float for f64 {
     #[inline]
@@ -84,6 +77,7 @@ impl Float for f64 {
     }
 
     #[inline]
+    #[allow(clippy::eq_op)]
     fn is_nan(&self) -> bool {
         self != self
     }
@@ -99,8 +93,7 @@ impl<'a, F: Float> Float for &'a F {
     fn is_nan(&self) -> bool {
         (*self).is_nan()
     }
-
-} 
+}
 
 #[inline]
 pub fn cmp<F: Float>(left: F, right: F) -> Ordering {
@@ -126,7 +119,6 @@ pub fn eq<F: Float>(left: F, right: F) -> bool {
         left == right
     }
 }
-
 
 #[inline]
 pub fn hash<F: Float, H: Hasher>(f: &F, state: &mut H) {

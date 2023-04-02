@@ -1,14 +1,11 @@
 [workspace]
 
 members = [
-    "core",
-    "migration",
-
     "odu-value",
     "odu-types",
     "odu-func",
     "odu-validate",
     "odu-input",
     "odu-macros",
-    "floating"
+    "floating",
 ]

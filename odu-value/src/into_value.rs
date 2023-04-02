@@ -90,12 +90,3 @@ impl<'a> From<&'a [u8]> for Value {
         Value::Bytes(value.to_vec().into())
     }
 }
-
-// impl<T> From<T> for Value
-// where
-//     T: IntoValue,
-// {
-//     fn from(value: T) -> Self {
-//         value.into_value()
-//     }
-// }

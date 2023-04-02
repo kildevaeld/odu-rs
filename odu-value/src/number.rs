@@ -113,10 +113,13 @@ impl fmt::Display for Number {
 }
 
 macro_rules! as_method {
-    ($method: ident, $ty: ty) => {
+    ($method: ident, $variant: ident, $ty: ty) => {
         #[inline]
         pub fn $method(&self) -> $ty {
-            self.as_u64() as $ty
+            match self {
+                Self::$variant(i) => *i,
+                n => n.as_u64() as $ty,
+            }
         }
     };
 }
@@ -138,13 +141,13 @@ impl Number {
         }
     }
 
-    as_method!(as_i64, i64);
-    as_method!(as_i8, i8);
-    as_method!(as_u8, u8);
-    as_method!(as_i16, i16);
-    as_method!(as_u16, u16);
-    as_method!(as_i32, i32);
-    as_method!(as_u32, u32);
+    as_method!(as_i64, I64, i64);
+    as_method!(as_i8, I8, i8);
+    as_method!(as_u8, U8, u8);
+    as_method!(as_i16, I16, i16);
+    as_method!(as_u16, U16, u16);
+    as_method!(as_i32, I32, i32);
+    as_method!(as_u32, U32, u32);
 
     #[inline]
     pub fn as_f32(&self) -> f32 {
@@ -181,6 +184,11 @@ impl Number {
     #[inline]
     pub fn is_float(&self) -> bool {
         matches!(self, Number::F32(_) | Number::F64(_))
+    }
+
+    #[inline]
+    pub fn is_integer(&self) -> bool {
+        !self.is_float()
     }
 }
 

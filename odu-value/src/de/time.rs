@@ -66,9 +66,9 @@ impl<E> TimeDeserializer<E> {
         }
     }
 
-    pub fn into_time(self) -> Time {
-        self.value
-    }
+    // pub fn into_time(self) -> Time {
+    //     self.value
+    // }
 }
 
 impl<'de, E> de::Deserializer<'de> for TimeDeserializer<E>

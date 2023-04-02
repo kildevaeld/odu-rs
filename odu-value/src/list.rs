@@ -41,6 +41,10 @@ impl List {
     pub fn iter_mut(&mut self) -> core::slice::IterMut<'_, Value> {
         self.v.iter_mut()
     }
+
+    pub fn push(&mut self, value: impl Into<Value>) {
+        self.v.push(value.into());
+    }
 }
 
 impl From<Vec<Value>> for List {
