@@ -1,5 +1,9 @@
 #![no_std]
 
+mod registry;
+mod r#struct;
+mod types;
+
 extern crate alloc;
 
 use alloc::{
