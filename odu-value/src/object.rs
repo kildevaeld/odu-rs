@@ -2,7 +2,6 @@ use crate::value::Value;
 use alloc::string::{String, ToString};
 use core::ops;
 use hashbrown::HashMap as StdHashMap;
-use odu_types::HasType;
 
 #[cfg(not(feature = "std"))]
 pub type HashBuilder = hashbrown::hash_map::DefaultHashBuilder;
@@ -153,11 +152,5 @@ impl From<StdHashMap<String, Value, HashBuilder>> for Map {
 impl From<alloc::collections::BTreeMap<String, Value>> for Map {
     fn from(map: alloc::collections::BTreeMap<String, Value>) -> Map {
         Map { inner: map }
-    }
-}
-
-impl HasType for Map {
-    fn typed(&self) -> odu_types::Type {
-        todo!()
     }
 }

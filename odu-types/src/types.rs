@@ -1,17 +1,26 @@
-use crate::{r#struct::Struct, registry::TypeId};
-use alloc::{boxed::Box, sync::Arc, vec::Vec};
+use crate::{
+    r#struct::Struct,
+    registry::{self, TypeId},
+};
+use alloc::{boxed::Box, sync::Arc, vec, vec::Vec};
+use once_cell::sync::Lazy;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", serde(untagged))]
-pub enum StaticType {
+pub enum ComplexType {
     Struct(Arc<Struct>),
+    List(List),
+    Map(Map),
+    Union(Union),
+    Optional(Optional),
+    Static(TypeId),
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", serde(tag = "type"))]
-pub enum Primitive {
+pub enum PrimitiveType {
     Bool,
     U8,
     I8,
@@ -32,19 +41,15 @@ pub enum Primitive {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", serde(untagged))]
 pub enum Type {
-    Primitive(Primitive),
-    List(List),
-    Map(Map),
-    Union(Union),
-    Optional(Optional),
-    Static(TypeId),
+    Primitive(PrimitiveType),
+    Complex(TypeId),
 }
 
 impl Type {
-    pub fn as_primitive(&self) -> Option<&Primitive> {
+    pub fn as_primitive(&self) -> Option<&PrimitiveType> {
         match self {
             Type::Primitive(primitive) => Some(primitive),
             _ => None,
@@ -52,12 +57,16 @@ impl Type {
     }
 
     pub fn is_optional(&self) -> bool {
-        matches!(self, Type::Optional(_))
+        let Type::Complex(complex) = self else {
+            return false
+        };
+
+        matches!(registry::Registry::get(complex), ComplexType::Optional(_))
     }
 }
 
-impl From<Primitive> for Type {
-    fn from(value: Primitive) -> Self {
+impl From<PrimitiveType> for Type {
+    fn from(value: PrimitiveType) -> Self {
         Type::Primitive(value)
     }
 }
@@ -65,13 +74,13 @@ impl From<Primitive> for Type {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Optional {
-    pub kind: Box<Type>,
+    pub kind: Type,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct List {
-    pub item: Box<Type>,
+    pub item: Type,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -83,6 +92,31 @@ pub struct Union {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Map {
-    pub key: Box<Type>,
-    pub value: Box<Type>,
+    pub key: Type,
+    pub value: Type,
 }
+
+pub static NUMBERS: Lazy<Type> = Lazy::new(|| {
+    use crate::StaticTyped;
+
+    let id = registry::register::<(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64), _>(|id| {
+        let union = Union {
+            items: vec![
+                i8::typed(),
+                u8::typed(),
+                i16::typed(),
+                u16::typed(),
+                i32::typed(),
+                u32::typed(),
+                i64::typed(),
+                u64::typed(),
+                f32::typed(),
+                f64::typed(),
+            ],
+        };
+
+        ComplexType::Union(union)
+    });
+
+    Type::Complex(id)
+});

@@ -1,25 +1,27 @@
 use super::types::Type;
-use alloc::{borrow::Cow, vec::Vec};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Struct {
-    pub name: Cow<'static, str>,
-    pub fields: Vec<Field>,
+    pub name: &'static str,
+    pub fields: &'static [Field],
 }
 
 impl Struct {
-    pub fn new(name: impl Into<Cow<'static, str>>) -> Struct {
-        Struct {
-            name: name.into(),
-            fields: Vec::default(),
-        }
+    pub const fn new(name: &'static str, fields: &'static [Field]) -> Struct {
+        Struct { name, fields }
     }
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Field {
-    pub name: Cow<'static, str>,
+    pub name: &'static str,
     pub kind: Type,
+}
+
+impl Field {
+    pub const fn new(name: &'static str, kind: Type) -> Field {
+        Field { name, kind }
+    }
 }

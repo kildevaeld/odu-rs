@@ -1,5 +1,4 @@
 use alloc::vec::Vec;
-use odu_types::HasType;
 
 use crate::value::Value;
 
@@ -60,11 +59,5 @@ impl IntoIterator for List {
 
     fn into_iter(self) -> Self::IntoIter {
         self.v.into_iter()
-    }
-}
-
-impl HasType for List {
-    fn typed(&self) -> odu_types::Type {
-        todo!()
     }
 }

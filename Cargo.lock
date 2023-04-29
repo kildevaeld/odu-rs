@@ -441,6 +441,7 @@ version = "0.1.0"
 dependencies = [
  "ahash",
  "bytes",
+ "chrono",
  "odu-macros",
  "once_cell",
  "parking_lot",
@@ -467,6 +468,7 @@ dependencies = [
  "floating",
  "hashbrown",
  "odu-types",
+ "once_cell",
  "serde",
 ]
 

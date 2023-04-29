@@ -1,5 +1,5 @@
 use alloc::{boxed::Box, vec::Vec};
-use odu_types::{List, Primitive, Struct, Type, Union};
+use odu_types::{List, PrimitiveType, Struct, Type, Union};
 
 use crate::{
     validations,
@@ -27,7 +27,7 @@ mod sealed {
     pub trait Sealed {}
 
     impl Sealed for odu_types::Type {}
-    impl Sealed for odu_types::Primitive {}
+    impl Sealed for odu_types::PrimitiveType {}
     impl Sealed for odu_types::Struct {}
 }
 
@@ -35,17 +35,17 @@ pub trait ToValidator {
     fn validator(&self) -> Validator;
 }
 
-impl ToValidator for Primitive {
+impl ToValidator for PrimitiveType {
     fn validator(&self) -> Validator {
         match self {
-            Primitive::Bool => BoolValidator::default().into(),
-            Primitive::String => StringValidator::default().into(),
-            Primitive::I8
-            | Primitive::U8
-            | Primitive::I16
-            | Primitive::U16
-            | Primitive::I64
-            | Primitive::U64 => NumberValidator::default().into(),
+            PrimitiveType::Bool => BoolValidator::default().into(),
+            PrimitiveType::String => StringValidator::default().into(),
+            PrimitiveType::I8
+            | PrimitiveType::U8
+            | PrimitiveType::I16
+            | PrimitiveType::U16
+            | PrimitiveType::I64
+            | PrimitiveType::U64 => NumberValidator::default().into(),
             _ => todo!(),
         }
     }
@@ -55,7 +55,7 @@ impl ToValidator for Struct {
     fn validator(&self) -> Validator {
         let mut builder = ObjectValidator::default();
 
-        for field in &self.fields {
+        for field in self.fields {
             builder.add_field(&field.name, field.kind.validator());
         }
 

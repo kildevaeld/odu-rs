@@ -2,7 +2,6 @@ use core::{
     fmt,
     hash::{Hash, Hasher},
 };
-use odu_types::HasType;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Number {
@@ -189,26 +188,6 @@ impl Number {
     #[inline]
     pub fn is_integer(&self) -> bool {
         !self.is_float()
-    }
-}
-
-impl HasType for Number {
-    fn typed(&self) -> odu_types::Type {
-        use odu_types::{Primitive, Type};
-        let ty = match *self {
-            Number::U8(_) => Primitive::U8,
-            Number::I8(_) => Primitive::I8,
-            Number::U16(_) => Primitive::U16,
-            Number::I16(_) => Primitive::I16,
-            Number::I32(_) => Primitive::I32,
-            Number::U32(_) => Primitive::U32,
-            Number::I64(_) => Primitive::I64,
-            Number::U64(_) => Primitive::U64,
-            Number::F32(_) => Primitive::F32,
-            Number::F64(_) => Primitive::F64,
-        };
-
-        Type::Primitive(ty)
     }
 }
 

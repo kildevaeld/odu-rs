@@ -21,3 +21,6 @@ serde = { version = "1", default-features = false, features = [
 
 floating = { path = "../floating" }
 chrono = { version = "0.4" }
+
+
+once_cell = { version = "1" }
