@@ -1,7 +1,7 @@
 use inquire::Text;
 use odu_input::{Input, Ui};
-use odu_types::{FromValue, Type, Typed};
-use odu_value::Map;
+use odu_types::{FromValue, StaticTyped, Type};
+use odu_value::{Map, Number, Value};
 
 struct Terminal;
 
@@ -47,7 +47,7 @@ struct Other {
 fn main() {
     let ty: Input = Test::typed().into();
 
-    let test: Test = Terminal.input("Test", &ty).unwrap().try_into().unwrap();
+    //let test: Test = Terminal.input("Test", &ty).unwrap().try_into().unwrap();
 
-    println!("test: {:#?}", test);
+    println!("test: {:#?}", Number::typed().as_complex());
 }

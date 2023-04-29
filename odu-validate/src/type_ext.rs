@@ -55,7 +55,7 @@ impl ToValidator for Struct {
     fn validator(&self) -> Validator {
         let mut builder = ObjectValidator::default();
 
-        for field in self.fields {
+        for field in &self.fields {
             builder.add_field(&field.name, field.kind.validator());
         }
 
@@ -86,7 +86,7 @@ impl ToValidator for Type {
             Type::Complex(ty) => match ty.data() {
                 ComplexType::List(list) => list.validator(),
 
-                ComplexType::Map(map) => {
+                ComplexType::Map(_) => {
                     todo!("map")
                 }
                 ComplexType::Struct(stru) => stru.validator(),

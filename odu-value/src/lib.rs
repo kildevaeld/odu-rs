@@ -19,7 +19,8 @@ mod macros;
 
 mod merge;
 
-mod shared;
+#[cfg(feature = "types")]
+mod types;
 
 pub use self::{
     from_value::*, index::Index, into_value::*, list::*, macros::*, merge::*, number::*, object::*,

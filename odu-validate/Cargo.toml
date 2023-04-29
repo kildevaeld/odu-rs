@@ -11,10 +11,10 @@ serde = ["dep:serde", "typetag", "odu-types/serde", "odu-value/serde"]
 
 [dependencies]
 odu-types = { path = "../odu-types" }
-odu-value = { path = "../odu-value" }
+odu-value = { path = "../odu-value", features = ["types"] }
 
 serde = { version = "1", features = ["derive"], optional = true }
-typetag = { version = "0.2", optional = true}
+typetag = { version = "0.2", optional = true }
 
 
 [dev-dependencies]

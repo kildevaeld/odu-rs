@@ -1,14 +1,15 @@
 use super::types::Type;
+use alloc::vec::Vec;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Struct {
     pub name: &'static str,
-    pub fields: &'static [Field],
+    pub fields: Vec<Field>,
 }
 
 impl Struct {
-    pub const fn new(name: &'static str, fields: &'static [Field]) -> Struct {
+    pub const fn new(name: &'static str, fields: Vec<Field>) -> Struct {
         Struct { name, fields }
     }
 }

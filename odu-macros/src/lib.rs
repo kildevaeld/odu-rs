@@ -32,11 +32,11 @@ fn derive_struct_typed(name: Ident, generics: Generics, item: DataStruct) -> Tok
         let ty = &m.ty;
         quote!(
 
-            build.fields.push(#odu_types_name::Field {
-                name: #name_str.into(),
+            #odu_types_name::Field {
+                name: #name_str,
                 kind: #ty::typed()
 
-            });
+            }
         )
     });
 
@@ -44,21 +44,18 @@ fn derive_struct_typed(name: Ident, generics: Generics, item: DataStruct) -> Tok
 
     quote!(
 
-        impl #odu_types_name::Typed for #name {
-            fn typed() -> #odu_types_name::Type {
-                let mut build = #odu_types_name::Struct::new(#name_str);
-
-                #(
-                    #fields
-                )*
-
-                #odu_types_name::Type::Struct(build)
+        impl #odu_types_name::HasStaticType for #name {
+            fn create_type_info() -> #odu_types_name::ComplexType {
+                static L: #odu_types_name::Lazy<#odu_types_name::ComplexType> = #odu_types_name::Lazy::new(|| {
+                    #odu_types_name::ComplexType::Struct(std::sync::Arc::new(#odu_types_name::Struct::new(#name_str, vec![#(#fields),*])))
+                });
+                L.clone()
             }
         }
 
-        impl #odu_types_name::HasType for #name {
+        impl #odu_types_name::Typed for #name {
             fn typed(&self) -> #odu_types_name::Type {
-                <#name as #odu_types_name::Typed>::typed()
+                <#name as #odu_types_name::StaticTyped>::typed()
             }
         }
 

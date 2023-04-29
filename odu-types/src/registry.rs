@@ -59,8 +59,10 @@ impl Registry {
 
         let type_id = TypeId::new();
 
+        let type_info = T::create_type_info();
+
         let mut w = registry().write();
-        w.types.insert(type_id, T::create_type_info());
+        w.types.insert(type_id, type_info);
         w.map.insert(key, type_id);
 
         type_id

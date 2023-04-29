@@ -7,7 +7,7 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use odu_types::{PrimitiveType, Struct, Type};
+use odu_types::{ComplexType, PrimitiveType, Struct, Type};
 use odu_validate::{StringValidator, ToValidator, Validation, ValidatorBuilderExt};
 use odu_value::{Map, Value};
 
@@ -61,30 +61,34 @@ impl From<PrimitiveType> for Input {
     }
 }
 
-// impl From<Struct> for Input {
-//     fn from(value: Struct) -> Self {
-//         Input::Form(Form {
-//             fields: value
-//                 .fields
-//                 .into_iter()
-//                 .map(|m| Field {
-//                     name: m.name.to_string(),
-//                     input: m.kind.into(),
-//                 })
-//                 .collect(),
-//         })
-//     }
-// }
+impl From<ComplexType> for Input {
+    fn from(value: ComplexType) -> Self {
+        match value {
+            ComplexType::Struct(s) => Input::Form(Form {
+                fields: s
+                    .fields
+                    .iter()
+                    .map(|m| Field {
+                        name: m.name.to_string(),
+                        input: m.kind.into(),
+                    })
+                    .collect(),
+            }),
+            _ => {
+                todo!()
+            }
+        }
+    }
+}
 
-// impl From<Type> for Input {
-//     fn from(value: Type) -> Self {
-//         match value {
-//             Type::Primitive(p) => p.into(),
-//             Type::Complex(s) => s.into(),
-//             _ => todo!(),
-//         }
-//     }
-// }
+impl From<Type> for Input {
+    fn from(value: Type) -> Self {
+        match value {
+            Type::Primitive(p) => p.into(),
+            Type::Complex(s) => s.data().into(),
+        }
+    }
+}
 
 pub trait Ui {
     type Error;

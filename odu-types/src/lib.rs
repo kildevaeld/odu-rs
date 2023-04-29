@@ -14,6 +14,11 @@ pub use self::{
     types::*,
 };
 
+pub use once_cell::sync::Lazy;
+
+#[cfg(feature = "derive")]
+pub use odu_macros::*;
+
 // use alloc::{
 //     boxed::Box,
 //     string::{String, ToString},
@@ -189,6 +194,3 @@ pub use self::{
 //     f32 => F32,
 //     f64 => F64
 // );
-
-// #[cfg(feature = "derive")]
-// pub use odu_macros::*;

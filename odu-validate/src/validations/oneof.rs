@@ -1,6 +1,5 @@
 use crate::{Validation, ValidationBox, ValidationError, ValidationList};
 use alloc::vec::Vec;
-use core::any::Any;
 use odu_value::Value;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
