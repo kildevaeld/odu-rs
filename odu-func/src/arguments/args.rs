@@ -1,6 +1,6 @@
 use super::error::ArgumentError;
 use alloc::vec::Vec;
-use odu_types::{HasType, Type};
+use odu_types::{Type, Typed};
 use odu_value::Value;
 
 #[derive(Debug, Default)]

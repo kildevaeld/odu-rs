@@ -1,10 +1,10 @@
 use crate::{Validation, ValidationError};
-use odu_types::{HasType, Primitive, Type};
+use odu_types::{PrimitiveType, Type, Typed};
 use odu_value::Value;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy)]
-pub struct TypeValidation(Primitive);
+pub struct TypeValidation(PrimitiveType);
 
 #[cfg_attr(feature = "serde", typetag::serde(name = "type"))]
 impl Validation for TypeValidation {
@@ -21,6 +21,6 @@ impl Validation for TypeValidation {
     }
 }
 
-pub fn typed(ty: Primitive) -> TypeValidation {
+pub fn typed(ty: PrimitiveType) -> TypeValidation {
     TypeValidation(ty)
 }

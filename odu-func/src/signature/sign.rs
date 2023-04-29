@@ -1,5 +1,5 @@
 use super::Parameters;
-use odu_types::{Primitive, Type};
+use odu_types::{PrimitiveType, Type};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
@@ -29,7 +29,7 @@ impl Default for Signature {
     fn default() -> Self {
         Signature {
             params: Parameters::default(),
-            return_type: Primitive::Void.into(),
+            return_type: PrimitiveType::Void.into(),
         }
     }
 }

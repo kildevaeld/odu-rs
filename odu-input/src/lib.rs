@@ -2,8 +2,12 @@
 
 extern crate alloc;
 
-use alloc::{boxed::Box, string::String, vec::Vec};
-use odu_types::{Primitive, Struct, Type};
+use alloc::{
+    boxed::Box,
+    string::{String, ToString},
+    vec::Vec,
+};
+use odu_types::{PrimitiveType, Struct, Type};
 use odu_validate::{StringValidator, ToValidator, Validation, ValidatorBuilderExt};
 use odu_value::{Map, Value};
 
@@ -45,10 +49,10 @@ pub struct Number {
     pub float: bool,
 }
 
-impl From<Primitive> for Input {
-    fn from(value: Primitive) -> Self {
+impl From<PrimitiveType> for Input {
+    fn from(value: PrimitiveType) -> Self {
         match value {
-            Primitive::String => Input::Text(Text {
+            PrimitiveType::String => Input::Text(Text {
                 default: None,
                 required: false,
             }),
@@ -57,30 +61,30 @@ impl From<Primitive> for Input {
     }
 }
 
-impl From<Struct> for Input {
-    fn from(value: Struct) -> Self {
-        Input::Form(Form {
-            fields: value
-                .fields
-                .into_iter()
-                .map(|m| Field {
-                    name: m.name,
-                    input: m.kind.into(),
-                })
-                .collect(),
-        })
-    }
-}
+// impl From<Struct> for Input {
+//     fn from(value: Struct) -> Self {
+//         Input::Form(Form {
+//             fields: value
+//                 .fields
+//                 .into_iter()
+//                 .map(|m| Field {
+//                     name: m.name.to_string(),
+//                     input: m.kind.into(),
+//                 })
+//                 .collect(),
+//         })
+//     }
+// }
 
-impl From<Type> for Input {
-    fn from(value: Type) -> Self {
-        match value {
-            Type::Primitive(p) => p.into(),
-            Type::Struct(s) => s.into(),
-            _ => todo!(),
-        }
-    }
-}
+// impl From<Type> for Input {
+//     fn from(value: Type) -> Self {
+//         match value {
+//             Type::Primitive(p) => p.into(),
+//             Type::Complex(s) => s.into(),
+//             _ => todo!(),
+//         }
+//     }
+// }
 
 pub trait Ui {
     type Error;

@@ -1,5 +1,5 @@
-use alloc::{boxed::Box, vec::Vec};
-use odu_types::{List, PrimitiveType, Struct, Type, Union};
+use alloc::vec::Vec;
+use odu_types::{ComplexType, List, PrimitiveType, Struct, Type, Union};
 
 use crate::{
     validations,
@@ -83,14 +83,16 @@ impl ToValidator for Type {
     fn validator(&self) -> Validator {
         match self {
             Type::Primitive(primitive) => primitive.validator(),
-            Type::List(list) => list.validator(),
+            Type::Complex(ty) => match ty.data() {
+                ComplexType::List(list) => list.validator(),
 
-            Type::Map(map) => {
-                todo!("map")
-            }
-            Type::Struct(stru) => stru.validator(),
-            Type::Optional(ty) => ty.kind.validator(),
-            Type::Union(a) => a.validator(),
+                ComplexType::Map(map) => {
+                    todo!("map")
+                }
+                ComplexType::Struct(stru) => stru.validator(),
+                ComplexType::Optional(ty) => ty.kind.validator(),
+                ComplexType::Union(a) => a.validator(),
+            },
         }
     }
 }

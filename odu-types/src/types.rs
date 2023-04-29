@@ -14,7 +14,6 @@ pub enum ComplexType {
     Map(Map),
     Union(Union),
     Optional(Optional),
-    Static(TypeId),
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -52,6 +51,13 @@ impl Type {
     pub fn as_primitive(&self) -> Option<&PrimitiveType> {
         match self {
             Type::Primitive(primitive) => Some(primitive),
+            _ => None,
+        }
+    }
+
+    pub fn as_complex(&self) -> Option<ComplexType> {
+        match self {
+            Type::Complex(ty) => Some(ty.data()),
             _ => None,
         }
     }

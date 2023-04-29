@@ -1,7 +1,7 @@
 use super::{error::ArgumentError, Arguments};
 use crate::signature::Parameters;
 use core::convert::Infallible;
-use odu_types::Typed;
+use odu_types::StaticTyped;
 use odu_value::Value;
 
 pub trait FromArguments<'a>: Sized + Send {
@@ -38,7 +38,7 @@ macro_rules! count {
 
 macro_rules! arguments {
     ($first: ident) => {
-        impl<'a, $first: TryFrom<&'a Value> + Typed + Send> FromArguments<'a> for ($first,)
+        impl<'a, $first: TryFrom<&'a Value> + StaticTyped + Send> FromArguments<'a> for ($first,)
         where
             $first::Error: Into<ArgumentError>
         {
@@ -58,7 +58,7 @@ macro_rules! arguments {
         arguments!($($rest)*);
 
 
-        impl<'a, $first: TryFrom<&'a Value> + Typed + Send, $($rest: TryFrom<&'a Value> + Typed + Send),*> FromArguments<'a> for ($first,$($rest),*)
+        impl<'a, $first: TryFrom<&'a Value> + StaticTyped + Send, $($rest: TryFrom<&'a Value> + StaticTyped + Send),*> FromArguments<'a> for ($first,$($rest),*)
         where
             $first::Error: Into<ArgumentError>,
             $(
