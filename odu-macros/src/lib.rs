@@ -2,7 +2,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Data, DataEnum, DataStruct, DeriveInput, Generics};
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput, Generics};
 
 #[proc_macro_derive(Type)]
 pub fn derive_typed(input: TokenStream) -> TokenStream {
@@ -14,16 +14,16 @@ pub fn derive_typed(input: TokenStream) -> TokenStream {
     } = parse_macro_input!(input as DeriveInput);
 
     match data {
-        Data::Enum(e) => panic!("cannot use enum"),
+        Data::Enum(_e) => panic!("cannot use enum"),
         Data::Struct(e) => derive_struct_typed(ident, generics, e),
         _ => panic!(""),
     }
 }
 
-fn derive_struct_typed(name: Ident, generics: Generics, item: DataStruct) -> TokenStream {
+fn derive_struct_typed(name: Ident, _generics: Generics, item: DataStruct) -> TokenStream {
     let odu_types_name = format_ident!("odu_types");
 
-    let len = item.fields.len();
+    let _len = item.fields.len();
 
     let fields = item.fields.iter().map(|m| {
         //
@@ -75,7 +75,7 @@ pub fn derive_into_value(input: TokenStream) -> TokenStream {
     } = parse_macro_input!(input as DeriveInput);
 
     match data {
-        Data::Enum(e) => panic!("cannot use enum"),
+        Data::Enum(_e) => panic!("cannot use enum"),
         Data::Struct(e) => derive_struct_into_value(ident, generics, e),
         _ => panic!(""),
     }
@@ -91,13 +91,13 @@ pub fn derive_from_value(input: TokenStream) -> TokenStream {
     } = parse_macro_input!(input as DeriveInput);
 
     match data {
-        Data::Enum(e) => panic!("cannot use enum"),
+        Data::Enum(_e) => panic!("cannot use enum"),
         Data::Struct(e) => derive_struct_from_value(ident, generics, e),
         _ => panic!(""),
     }
 }
 
-fn derive_struct_into_value(name: Ident, generics: Generics, item: DataStruct) -> TokenStream {
+fn derive_struct_into_value(name: Ident, _generics: Generics, item: DataStruct) -> TokenStream {
     let odu_value_name = format_ident!("odu_value");
 
     let len = item.fields.len();
@@ -127,10 +127,10 @@ fn derive_struct_into_value(name: Ident, generics: Generics, item: DataStruct) -
     .into()
 }
 
-fn derive_struct_from_value(name: Ident, generics: Generics, item: DataStruct) -> TokenStream {
+fn derive_struct_from_value(name: Ident, _generics: Generics, item: DataStruct) -> TokenStream {
     let odu_value_name = format_ident!("odu_value");
 
-    let len = item.fields.len();
+    let _len = item.fields.len();
 
     let fields = item.fields.iter().map(|m| {
         //

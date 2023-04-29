@@ -56,7 +56,7 @@ impl ToValidator for Struct {
         let mut builder = ObjectValidator::default();
 
         for field in &self.fields {
-            builder.add_field(&field.name, field.kind.validator());
+            builder.add_field(field.name, field.kind.validator());
         }
 
         builder.into()

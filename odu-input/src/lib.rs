@@ -7,8 +7,8 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use odu_types::{ComplexType, PrimitiveType, Struct, Type};
-use odu_validate::{StringValidator, ToValidator, Validation, ValidatorBuilderExt};
+use odu_types::{ComplexType, PrimitiveType, Type};
+use odu_validate::{StringValidator, ToValidator};
 use odu_value::{Map, Value};
 
 pub enum Input {

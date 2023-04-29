@@ -2,7 +2,7 @@ use crate::{
     r#struct::Struct,
     registry::{self, TypeId},
 };
-use alloc::{boxed::Box, sync::Arc, vec, vec::Vec};
+use alloc::{sync::Arc, vec, vec::Vec};
 use once_cell::sync::Lazy;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -105,7 +105,7 @@ pub struct Map {
 pub static NUMBERS: Lazy<Type> = Lazy::new(|| {
     use crate::StaticTyped;
 
-    let id = registry::register::<(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64), _>(|id| {
+    let id = registry::register::<(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64), _>(|_id| {
         let union = Union {
             items: vec![
                 i8::typed(),
