@@ -6,20 +6,27 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.htmlshow_streams
 
 [features]
-default= []
+default = []
 derive = ["odu-macros"]
-serde = ["dep:serde", "odu-types/serde", "odu-value/serde", "odu-validate/serde"]
+serde = [
+    "dep:serde",
+    "odu-types/serde",
+    "odu-value/serde",
+    "odu-validate/serde",
+]
 
 [dependencies]
 odu-types = { path = "../odu-types" }
 odu-value = { path = "../odu-value" }
 odu-validate = { path = "../odu-validate" }
 
-futures-core = { version = "0.3"}
+futures-core = { version = "0.3" }
 
 odu-macros = { path = "../odu-macros", optional = true }
-serde = {version = "1", default-features = false, features = ["derive", "rc"], optional = true}
-
+serde = { version = "1", default-features = false, features = [
+    "derive",
+    "rc",
+], optional = true }
 
 
 [dev-dependencies]
@@ -29,4 +36,4 @@ serde_json = "1"
 [[example]]
 name = "funcs"
 path = "examples/funcs.rs"
-required-features = ["derive"]
+required-features = ["derive", "serde"]

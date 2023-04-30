@@ -28,7 +28,7 @@ mod sealed {
 
     impl Sealed for odu_types::Type {}
     impl Sealed for odu_types::PrimitiveType {}
-    impl Sealed for odu_types::Struct {}
+    impl<'a> Sealed for odu_types::Struct<'a> {}
 }
 
 pub trait ToValidator {
@@ -51,7 +51,7 @@ impl ToValidator for PrimitiveType {
     }
 }
 
-impl ToValidator for Struct {
+impl<'a> ToValidator for Struct<'a> {
     fn validator(&self) -> Validator {
         let mut builder = ObjectValidator::default();
 

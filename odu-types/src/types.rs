@@ -8,8 +8,9 @@ use once_cell::sync::Lazy;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", serde(untagged))]
-pub enum ComplexType {
-    Struct(Arc<Struct>),
+pub enum ComplexType<'a> {
+    #[cfg_attr(feature = "serde", serde(borrow))]
+    Struct(Arc<Struct<'a>>),
     List(List),
     Map(Map),
     Union(Union),
@@ -39,12 +40,33 @@ pub enum PrimitiveType {
     Void,
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", serde(untagged))]
 pub enum Type {
     Primitive(PrimitiveType),
     Complex(TypeId),
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Type {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            Type::Primitive(p) => p.serialize(serializer),
+            Type::Complex(c) => c.data().serialize(serializer),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Type {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        todo!()
+    }
 }
 
 impl Type {

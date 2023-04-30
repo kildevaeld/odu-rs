@@ -5,7 +5,7 @@ use parking_lot::RwLock;
 use crate::types::ComplexType;
 
 pub trait HasStaticType {
-    fn create_type_info() -> ComplexType;
+    fn create_type_info() -> ComplexType<'static>;
 }
 
 static REGISTRY: OnceCell<RwLock<Registry>> = OnceCell::new();
@@ -25,7 +25,7 @@ impl TypeId {
 }
 
 pub(crate) struct Registry {
-    types: ahash::HashMap<TypeId, ComplexType>,
+    types: ahash::HashMap<TypeId, ComplexType<'static>>,
     map: ahash::HashMap<core::any::TypeId, TypeId>,
 }
 
@@ -42,11 +42,11 @@ pub fn type_id<T: HasStaticType + 'static>() -> TypeId {
     Registry::register::<T>()
 }
 
-pub fn type_info(id: TypeId) -> ComplexType {
+pub fn type_info(id: TypeId) -> ComplexType<'static> {
     Registry::get(&id)
 }
 
-pub fn register<V: 'static, F: FnOnce(TypeId) -> ComplexType>(func: F) -> TypeId {
+pub fn register<V: 'static, F: FnOnce(TypeId) -> ComplexType<'static>>(func: F) -> TypeId {
     Registry::register_dynamic::<V, _>(func)
 }
 
@@ -68,7 +68,9 @@ impl Registry {
         type_id
     }
 
-    pub fn register_dynamic<V: 'static, F: FnOnce(TypeId) -> ComplexType>(func: F) -> TypeId {
+    pub fn register_dynamic<V: 'static, F: FnOnce(TypeId) -> ComplexType<'static>>(
+        func: F,
+    ) -> TypeId {
         let key = core::any::TypeId::of::<V>();
         if let Some(id) = registry().read().map.get(&key) {
             return *id;
@@ -85,7 +87,7 @@ impl Registry {
         type_id
     }
 
-    pub fn get(id: &TypeId) -> ComplexType {
+    pub fn get(id: &TypeId) -> ComplexType<'static> {
         let map = registry().read();
         map.types[id].clone()
     }

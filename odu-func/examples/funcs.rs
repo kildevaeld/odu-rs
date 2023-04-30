@@ -54,7 +54,7 @@ fn main() -> Result<(), Error> {
 
     let result = futures_executor::block_on(action.call_async(args))?;
 
-    // let result = action.call(args)?;
+    //let result = action.call(args)?;
 
     println!("Result: {:?}", result);
 
