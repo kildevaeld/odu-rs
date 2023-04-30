@@ -1,8 +1,11 @@
 use crate::{
     r#struct::Struct,
     registry::{self, TypeId},
+    StaticTyped,
 };
-use alloc::{sync::Arc, vec, vec::Vec};
+use alloc::{string::String, sync::Arc, vec, vec::Vec};
+use bytes::Bytes;
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use once_cell::sync::Lazy;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -170,8 +173,6 @@ pub struct Map {
 }
 
 pub static NUMBERS: Lazy<Type> = Lazy::new(|| {
-    use crate::StaticTyped;
-
     let id = registry::register::<(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64), _>(|_id| {
         let union = Union {
             items: vec![
@@ -185,6 +186,53 @@ pub static NUMBERS: Lazy<Type> = Lazy::new(|| {
                 u64::typed(),
                 f32::typed(),
                 f64::typed(),
+            ],
+        };
+
+        ComplexType::Union(union)
+    });
+
+    Type::Complex(id)
+});
+
+pub static PRIMITIVES: Lazy<Type> = Lazy::new(|| {
+    let id = registry::register::<
+        (
+            i8,
+            u8,
+            i16,
+            u16,
+            i32,
+            u32,
+            i64,
+            u64,
+            f32,
+            f64,
+            String,
+            Bytes,
+            NaiveDate,
+            NaiveDateTime,
+            NaiveTime,
+        ),
+        _,
+    >(|_id| {
+        let union = Union {
+            items: vec![
+                i8::typed(),
+                u8::typed(),
+                i16::typed(),
+                u16::typed(),
+                i32::typed(),
+                u32::typed(),
+                i64::typed(),
+                u64::typed(),
+                f32::typed(),
+                f64::typed(),
+                String::typed(),
+                Bytes::typed(),
+                NaiveDate::typed(),
+                NaiveDateTime::typed(),
+                NaiveTime::typed(),
             ],
         };
 
