@@ -1,7 +1,6 @@
-use crate::{number::Number, time::Time, HashMap, List, Map};
+use crate::{number::Number, time::Time, List, Map};
 
 use super::value::Value;
-#[cfg(not(feature = "std"))]
 use alloc::{
     string::{String, ToString},
     vec,
@@ -201,9 +200,9 @@ impl ser::Serializer for Serializer {
         T: ser::Serialize,
     {
         value.serialize(Serializer).map(|v| {
-            let mut map = HashMap::new();
+            let mut map = Map::with_capacity(1);
             map.insert(variant.to_string(), v);
-            Value::Map(map.into())
+            map.into()
         })
     }
 
@@ -236,9 +235,9 @@ impl ser::Serializer for Serializer {
         ))
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
         Ok(SerializeMap {
-            map: HashMap::new(),
+            map: Map::with_capacity(len.unwrap_or_default()),
             key: None,
         })
     }
@@ -246,9 +245,9 @@ impl ser::Serializer for Serializer {
     fn serialize_struct(
         self,
         _name: &'static str,
-        _len: usize,
+        len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        Ok(SerializeStruct(HashMap::new()))
+        Ok(SerializeStruct(Map::with_capacity(len)))
     }
 
     fn serialize_struct_variant(
@@ -256,9 +255,12 @@ impl ser::Serializer for Serializer {
         _name: &'static str,
         _variant_index: u32,
         variant: &'static str,
-        _len: usize,
+        len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        Ok(SerializeStructVariant(variant.to_string(), HashMap::new()))
+        Ok(SerializeStructVariant(
+            variant.to_string(),
+            Map::with_capacity(len),
+        ))
     }
 }
 
@@ -338,14 +340,14 @@ impl ser::SerializeTupleVariant for SerializeTupleVariant {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        let mut map = HashMap::new();
+        let mut map = Map::default();
         map.insert(self.0, Value::List(self.1.into()));
         Ok(Value::Map(map.into()))
     }
 }
 
 struct SerializeMap {
-    map: HashMap<String, Value>,
+    map: Map,
     key: Option<String>,
 }
 
@@ -377,7 +379,7 @@ impl ser::SerializeMap for SerializeMap {
     }
 }
 
-struct SerializeStruct(HashMap<String, Value>);
+struct SerializeStruct(Map);
 
 impl ser::SerializeStruct for SerializeStruct {
     type Ok = Value;
@@ -402,7 +404,7 @@ impl ser::SerializeStruct for SerializeStruct {
     }
 }
 
-struct SerializeStructVariant(String, HashMap<String, Value>);
+struct SerializeStructVariant(String, Map);
 
 impl ser::SerializeStructVariant for SerializeStructVariant {
     type Ok = Value;
@@ -423,7 +425,7 @@ impl ser::SerializeStructVariant for SerializeStructVariant {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        let mut map = HashMap::new();
+        let mut map = Map::with_capacity(1);
         map.insert(self.0, Value::Map(self.1.into()));
         Ok(Value::Map(map.into()))
     }

@@ -1,6 +1,5 @@
 use super::{number, time};
 use crate::{value::Value, Map, MapImpl};
-#[cfg(not(feature = "std"))]
 use alloc::{
     borrow::ToOwned,
     string::{String, ToString},
