@@ -1,36 +1,27 @@
 use crate::value::Value;
 use alloc::string::{String, ToString};
 use core::ops;
-use hashbrown::HashMap as StdHashMap;
 
-#[cfg(not(feature = "std"))]
-pub type HashBuilder = hashbrown::hash_map::DefaultHashBuilder;
+#[cfg(all(not(feature = "ord"), feature = "std"))]
+pub(crate) type MapImpl = std::collections::HashMap<String, Value>;
+#[cfg(all(not(feature = "ord"), feature = "std"))]
+type Iter<'a, K, V> = std::collections::hash_map::Iter<'a, K, V>;
+#[cfg(all(not(feature = "ord"), feature = "std"))]
+type IntoIter<K, V> = std::collections::hash_map::IntoIter<K, V>;
+#[cfg(all(not(feature = "ord"), feature = "std"))]
+type IterMut<'a, K, V> = std::collections::hash_map::IterMut<'a, K, V>;
+#[cfg(all(not(feature = "ord"), feature = "std"))]
+type Entry<'a, K, V> = std::collections::hash_map::Entry<'a, K, V>;
 
-#[cfg(feature = "std")]
-pub type HashBuilder = std::collections::hash_map::RandomState;
-
-pub type HashMap<K, V> = StdHashMap<K, V, HashBuilder>;
-
-#[cfg(not(feature = "ord"))]
-pub(crate) type MapImpl = HashMap<String, Value>;
-#[cfg(not(feature = "ord"))]
-type Iter<'a, K, V> = hashbrown::hash_map::Iter<'a, K, V>;
-#[cfg(not(feature = "ord"))]
-type IntoIter<K, V> = hashbrown::hash_map::IntoIter<K, V>;
-#[cfg(not(feature = "ord"))]
-type IterMut<'a, K, V> = hashbrown::hash_map::IterMut<'a, K, V>;
-#[cfg(not(feature = "ord"))]
-type Entry<'a, K, V> = hashbrown::hash_map::Entry<'a, K, V, HashBuilder>;
-
-#[cfg(feature = "ord")]
+#[cfg(any(feature = "ord", not(feature = "std")))]
 pub(crate) type MapImpl = alloc::collections::BTreeMap<String, Value>;
-#[cfg(feature = "ord")]
+#[cfg(any(feature = "ord", not(feature = "std")))]
 type Iter<'a, K, V> = alloc::collections::btree_map::Iter<'a, K, V>;
-#[cfg(feature = "ord")]
+#[cfg(any(feature = "ord", not(feature = "std")))]
 type IntoIter<K, V> = alloc::collections::btree_map::IntoIter<K, V>;
-#[cfg(feature = "ord")]
+#[cfg(any(feature = "ord", not(feature = "std")))]
 type IterMut<'a, K, V> = alloc::collections::btree_map::IterMut<'a, K, V>;
-#[cfg(feature = "ord")]
+#[cfg(any(feature = "ord", not(feature = "std")))]
 type Entry<'a, K, V> = alloc::collections::btree_map::Entry<'a, K, V>;
 
 #[cfg_attr(feature = "ord", derive(Hash, PartialOrd, Ord))]
@@ -40,10 +31,17 @@ pub struct Map {
 }
 
 impl Map {
-    #[cfg(not(feature = "ord"))]
+    #[cfg(all(not(feature = "ord"), feature = "std"))]
     pub fn with_capacity(len: usize) -> Map {
         Map {
             inner: MapImpl::with_capacity(len),
+        }
+    }
+
+    #[cfg(any(feature = "ord", not(feature = "std")))]
+    pub fn with_capacity(_: usize) -> Map {
+        Map {
+            inner: MapImpl::default(),
         }
     }
 
@@ -141,14 +139,23 @@ impl<'a> ops::IndexMut<&'a str> for Map {
     }
 }
 
-#[cfg(not(feature = "ord"))]
-impl From<StdHashMap<String, Value, HashBuilder>> for Map {
-    fn from(map: StdHashMap<String, Value, HashBuilder>) -> Map {
-        Map { inner: map }
+// #[cfg(all(not(feature = "ord"), feature = "std"))]
+// impl From<std::collections::HashMap<String, Value>> for Map {
+//     fn from(map: std::collections::HashMap<String, Value>) -> Map {
+//         Map { inner: map }
+//     }
+// }
+
+#[cfg(all(not(feature = "ord"), feature = "std"))]
+impl<S> From<std::collections::HashMap<String, Value, S>> for Map {
+    fn from(map: std::collections::HashMap<String, Value, S>) -> Map {
+        Map {
+            inner: MapImpl::from_iter(map),
+        }
     }
 }
 
-#[cfg(feature = "ord")]
+#[cfg(any(feature = "ord", not(feature = "std")))]
 impl From<alloc::collections::BTreeMap<String, Value>> for Map {
     fn from(map: alloc::collections::BTreeMap<String, Value>) -> Map {
         Map { inner: map }
