@@ -32,11 +32,7 @@ fn derive_struct_typed(name: Ident, _generics: Generics, item: DataStruct) -> To
         let ty = &m.ty;
         quote!(
 
-            #odu_types_name::Field {
-                name: #name_str,
-                kind: <#ty as #odu_types_name::StaticTyped>::typed()
-
-            }
+            #odu_types_name::Field::new(#name_str, <#ty as #odu_types_name::StaticTyped>::typed())
         )
     });
 
@@ -45,7 +41,7 @@ fn derive_struct_typed(name: Ident, _generics: Generics, item: DataStruct) -> To
     quote!(
 
         impl #odu_types_name::HasStaticType for #name {
-            fn create_type_info() -> #odu_types_name::ComplexType<'static> {
+            fn create_type_info() -> #odu_types_name::ComplexType {
                 static L: #odu_types_name::Lazy<#odu_types_name::ComplexType> = #odu_types_name::Lazy::new(|| {
                     #odu_types_name::ComplexType::Struct(std::sync::Arc::new(#odu_types_name::Struct::new(#name_str, vec![#(#fields),*])))
                 });

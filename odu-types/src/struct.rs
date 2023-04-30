@@ -1,30 +1,35 @@
 use super::types::Type;
 use alloc::vec::Vec;
+use ustr::Ustr;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Struct<'a> {
-    #[cfg_attr(feature = "serde", serde(borrow))]
-    pub name: &'a str,
-    pub fields: Vec<Field<'a>>,
+pub struct Struct {
+    pub name: Ustr,
+    pub fields: Vec<Field>,
 }
 
-impl<'a> Struct<'a> {
-    pub const fn new(name: &'a str, fields: Vec<Field<'a>>) -> Struct<'a> {
+impl Struct {
+    pub fn new(name: &str, mut fields: Vec<Field>) -> Struct {
+        let name = ustr::existing_ustr(name).unwrap_or_else(|| ustr::ustr(name));
+
+        fields.sort_by(|a, b| a.name.cmp(&b.name));
+
         Struct { name, fields }
     }
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Field<'a> {
-    #[cfg_attr(feature = "serde", serde(borrow))]
-    pub name: &'a str,
+pub struct Field {
+    pub name: Ustr,
     pub kind: Type,
 }
 
-impl<'a> Field<'a> {
-    pub const fn new(name: &'a str, kind: Type) -> Field {
+impl Field {
+    pub fn new(name: &str, kind: Type) -> Field {
+        let name = ustr::existing_ustr(name).unwrap_or_else(|| ustr::ustr(name));
+
         Field { name, kind }
     }
 }

@@ -4,8 +4,8 @@ mod item;
 mod oneof;
 mod required;
 mod tuple;
-mod types;
+// mod types;
 
 // pub use self::{compare::*, item::*, oneof::*, required::*, tuple::*, types::*};
 
-pub use self::{compare::*, item::*, oneof::*, required::*, tuple::*, types::*};
+pub use self::{compare::*, item::*, oneof::*, required::*, tuple::*};

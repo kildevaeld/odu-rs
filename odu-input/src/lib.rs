@@ -61,7 +61,7 @@ impl From<PrimitiveType> for Input {
     }
 }
 
-impl<'a> From<ComplexType<'a>> for Input {
+impl<'a> From<ComplexType> for Input {
     fn from(value: ComplexType) -> Self {
         match value {
             ComplexType::Struct(s) => Input::Form(Form {

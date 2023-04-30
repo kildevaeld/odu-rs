@@ -9,7 +9,7 @@ extern crate alloc;
 
 pub use self::{
     r#struct::*,
-    registry::{register, type_id, type_info, HasStaticType, TypeId},
+    registry::{register, register_dynamic, type_id, type_info, HasStaticType, TypeId},
     traits::*,
     types::*,
 };

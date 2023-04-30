@@ -8,9 +8,8 @@ use once_cell::sync::Lazy;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", serde(untagged))]
-pub enum ComplexType<'a> {
-    #[cfg_attr(feature = "serde", serde(borrow))]
-    Struct(Arc<Struct<'a>>),
+pub enum ComplexType {
+    Struct(Arc<Struct>),
     List(List),
     Map(Map),
     Union(Union),
@@ -19,7 +18,6 @@ pub enum ComplexType<'a> {
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", serde(tag = "type"))]
 pub enum PrimitiveType {
     Bool,
     U8,
@@ -60,12 +58,59 @@ impl serde::Serialize for Type {
 }
 
 #[cfg(feature = "serde")]
-impl<'de> serde::Deserialize<'de> for Type {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        todo!()
+mod de {
+    use crate::{ComplexType, PrimitiveType};
+
+    use super::Type;
+    use core::fmt;
+    use serde::{
+        de::{self, MapAccess},
+        Deserialize,
+    };
+
+    pub struct TypeVisitor;
+
+    impl<'de> de::Visitor<'de> for TypeVisitor {
+        type Value = Type;
+
+        fn expecting(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+            fmt.write_str("a type description")
+        }
+
+        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            PrimitiveType::deserialize(de::value::StrDeserializer::new(v)).map(Type::Primitive)
+        }
+
+        fn visit_string<E>(self, v: alloc::string::String) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            self.visit_str(&v)
+        }
+
+        fn visit_map<M>(self, map: M) -> Result<Self::Value, M::Error>
+        where
+            M: MapAccess<'de>,
+        {
+            let complex_type =
+                ComplexType::deserialize(de::value::MapAccessDeserializer::new(map))?;
+
+            let type_id = crate::register_dynamic(|_| complex_type);
+
+            Ok(Type::Complex(type_id))
+        }
+    }
+
+    impl<'de> serde::de::Deserialize<'de> for Type {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: serde::Deserializer<'de>,
+        {
+            deserializer.deserialize_any(TypeVisitor)
+        }
     }
 }
 

@@ -5,11 +5,12 @@ use parking_lot::RwLock;
 use crate::types::ComplexType;
 
 pub trait HasStaticType {
-    fn create_type_info() -> ComplexType<'static>;
+    fn create_type_info() -> ComplexType;
 }
 
 static REGISTRY: OnceCell<RwLock<Registry>> = OnceCell::new();
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TypeId(usize);
 
@@ -25,7 +26,7 @@ impl TypeId {
 }
 
 pub(crate) struct Registry {
-    types: ahash::HashMap<TypeId, ComplexType<'static>>,
+    types: ahash::HashMap<TypeId, ComplexType>,
     map: ahash::HashMap<core::any::TypeId, TypeId>,
 }
 
@@ -42,12 +43,16 @@ pub fn type_id<T: HasStaticType + 'static>() -> TypeId {
     Registry::register::<T>()
 }
 
-pub fn type_info(id: TypeId) -> ComplexType<'static> {
+pub fn type_info(id: TypeId) -> ComplexType {
     Registry::get(&id)
 }
 
-pub fn register<V: 'static, F: FnOnce(TypeId) -> ComplexType<'static>>(func: F) -> TypeId {
+pub fn register<V: 'static, F: FnOnce(TypeId) -> ComplexType>(func: F) -> TypeId {
     Registry::register_dynamic::<V, _>(func)
+}
+
+pub fn register_dynamic<F: FnOnce(TypeId) -> ComplexType>(func: F) -> TypeId {
+    Registry::register_dynamic2(func)
 }
 
 impl Registry {
@@ -68,9 +73,7 @@ impl Registry {
         type_id
     }
 
-    pub fn register_dynamic<V: 'static, F: FnOnce(TypeId) -> ComplexType<'static>>(
-        func: F,
-    ) -> TypeId {
+    pub fn register_dynamic<V: 'static, F: FnOnce(TypeId) -> ComplexType>(func: F) -> TypeId {
         let key = core::any::TypeId::of::<V>();
         if let Some(id) = registry().read().map.get(&key) {
             return *id;
@@ -87,7 +90,18 @@ impl Registry {
         type_id
     }
 
-    pub fn get(id: &TypeId) -> ComplexType<'static> {
+    pub fn register_dynamic2<F: FnOnce(TypeId) -> ComplexType>(func: F) -> TypeId {
+        let type_id = TypeId::new();
+
+        let ty = func(type_id);
+
+        let mut w = registry().write();
+        w.types.insert(type_id, ty);
+
+        type_id
+    }
+
+    pub fn get(id: &TypeId) -> ComplexType {
         let map = registry().read();
         map.types[id].clone()
     }

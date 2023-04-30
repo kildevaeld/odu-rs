@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["serde"]
-serde = ["dep:serde", "typetag", "odu-types/serde", "odu-value/serde"]
+default = []
+serde = ["dep:serde", "typetag", "odu-value/serde"]
 
 [dependencies]
 odu-types = { path = "../odu-types" }
