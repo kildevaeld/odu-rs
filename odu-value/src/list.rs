@@ -61,3 +61,11 @@ impl IntoIterator for List {
         self.v.into_iter()
     }
 }
+
+impl<V: Into<Value>> FromIterator<V> for List {
+    fn from_iter<T: IntoIterator<Item = V>>(iter: T) -> Self {
+        List {
+            v: Vec::from_iter(iter.into_iter().map(|m| m.into())),
+        }
+    }
+}

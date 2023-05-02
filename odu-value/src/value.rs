@@ -149,3 +149,15 @@ impl AsMut<Value> for Value {
         self
     }
 }
+
+impl FromIterator<(String, Value)> for Value {
+    fn from_iter<T: IntoIterator<Item = (String, Value)>>(iter: T) -> Self {
+        Value::Map(Map::from_iter(iter))
+    }
+}
+
+impl<V: Into<Value>> FromIterator<V> for Value {
+    fn from_iter<T: IntoIterator<Item = V>>(iter: T) -> Self {
+        Value::List(List::from_iter(iter))
+    }
+}

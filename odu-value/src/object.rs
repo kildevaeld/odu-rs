@@ -99,6 +99,14 @@ impl Map {
     }
 }
 
+impl FromIterator<(String, Value)> for Map {
+    fn from_iter<T: IntoIterator<Item = (String, Value)>>(iter: T) -> Self {
+        Map {
+            inner: MapImpl::from_iter(iter),
+        }
+    }
+}
+
 impl Extend<(String, Value)> for Map {
     fn extend<T: IntoIterator<Item = (String, Value)>>(&mut self, iter: T) {
         self.inner.extend(iter)
