@@ -2,7 +2,7 @@ use crate::{
     registry::{self, HasStaticType},
     types::{PrimitiveType, Type},
 };
-use alloc::string::String;
+use alloc::{string::String, vec::Vec};
 use bytes::{Bytes, BytesMut};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
 
@@ -96,5 +96,41 @@ impl<T: TimeZone> Typed for DateTime<T> {
 impl<T: TimeZone> StaticTyped for DateTime<T> {
     fn typed() -> Type {
         DATE_TIME
+    }
+}
+
+impl StaticTyped for Vec<u8> {
+    fn typed() -> Type {
+        Type::Primitive(PrimitiveType::Bytes)
+    }
+}
+
+impl Typed for Vec<u8> {
+    fn typed(&self) -> Type {
+        Type::Primitive(PrimitiveType::Bytes)
+    }
+}
+
+impl<'a> StaticTyped for &'a [u8] {
+    fn typed() -> Type {
+        Type::Primitive(PrimitiveType::Bytes)
+    }
+}
+
+impl<'a> Typed for &'a [u8] {
+    fn typed(&self) -> Type {
+        Type::Primitive(PrimitiveType::Bytes)
+    }
+}
+
+impl<'a> StaticTyped for &'a str {
+    fn typed() -> Type {
+        Type::Primitive(PrimitiveType::String)
+    }
+}
+
+impl<'a> Typed for &'a str {
+    fn typed(&self) -> Type {
+        Type::Primitive(PrimitiveType::String)
     }
 }
