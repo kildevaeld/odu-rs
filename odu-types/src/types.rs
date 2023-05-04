@@ -1,9 +1,16 @@
+use core::fmt::{self, Display};
+
 use crate::{
     r#struct::Struct,
     registry::{self, TypeId},
     StaticTyped,
 };
-use alloc::{string::String, sync::Arc, vec, vec::Vec};
+use alloc::{
+    string::{String, ToString},
+    sync::Arc,
+    vec,
+    vec::Vec,
+};
 use bytes::Bytes;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use once_cell::sync::Lazy;
@@ -39,6 +46,36 @@ pub enum PrimitiveType {
     DateTime,
     Time,
     Void,
+}
+
+impl PrimitiveType {
+    pub fn name(&self) -> &'static str {
+        match self {
+            PrimitiveType::Bool => "bool",
+            PrimitiveType::U8 => "u8",
+            PrimitiveType::I8 => "i8",
+            PrimitiveType::U16 => "u16",
+            PrimitiveType::I16 => "i16",
+            PrimitiveType::U32 => "u32",
+            PrimitiveType::I32 => "i32",
+            PrimitiveType::U64 => "u64",
+            PrimitiveType::I64 => "i64",
+            PrimitiveType::F32 => "f32",
+            PrimitiveType::F64 => "f64",
+            PrimitiveType::String => "string",
+            PrimitiveType::Bytes => "bytes",
+            PrimitiveType::Date => "date",
+            PrimitiveType::DateTime => "datetime",
+            PrimitiveType::Time => "time",
+            PrimitiveType::Void => "void",
+        }
+    }
+}
+
+impl fmt::Display for PrimitiveType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name())
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -138,6 +175,29 @@ impl Type {
         };
 
         matches!(registry::Registry::get(complex), ComplexType::Optional(_))
+    }
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Type::Primitive(v) => v.fmt(f),
+            Type::Complex(v) => match v.data() {
+                ComplexType::List(l) => write!(f, "List<{}>", l.item),
+                ComplexType::Map(m) => write!(f, "Map<{},{}>", m.key, m.value),
+                ComplexType::Optional(m) => write!(f, "Optional<{}>", m.kind),
+                ComplexType::Struct(m) => write!(f, "{}", m.name),
+                ComplexType::Union(m) => write!(
+                    f,
+                    "{}",
+                    m.items
+                        .iter()
+                        .map(|m| m.to_string())
+                        .collect::<Vec<_>>()
+                        .join(" | ")
+                ),
+            },
+        }
     }
 }
 
