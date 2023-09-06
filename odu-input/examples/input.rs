@@ -47,7 +47,7 @@ struct Other {
 fn main() {
     let ty: Input = Test::typed().into();
 
-    //let test: Test = Terminal.input("Test", &ty).unwrap().try_into().unwrap();
+    let test: Test = Terminal.input("Test", &ty).unwrap().try_into().unwrap();
 
-    println!("test: {:#?}", Number::typed().as_complex());
+    println!("test: {:#?}", Test::typed());
 }

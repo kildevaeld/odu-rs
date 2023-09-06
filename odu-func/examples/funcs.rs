@@ -38,8 +38,6 @@ fn main() -> Result<(), Error> {
             .to_arguments(),
     );
 
-    // println!("Result: {:?}", ret);
-    println!("Params: {:#?}", callable.parameters().validator());
     println!(
         "{}",
         serde_json::to_string_pretty(&callable.parameters().validator()).unwrap()
