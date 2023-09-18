@@ -1,4 +1,4 @@
-use core::fmt::{self, Display};
+use core::fmt::{self};
 
 use crate::{
     r#struct::Struct,
@@ -171,7 +171,7 @@ impl Type {
 
     pub fn is_optional(&self) -> bool {
         let Type::Complex(complex) = self else {
-            return false
+            return false;
         };
 
         matches!(registry::Registry::get(complex), ComplexType::Optional(_))

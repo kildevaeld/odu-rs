@@ -1,9 +1,12 @@
-use core::{marker::PhantomData, pin::Pin};
-
-use crate::{arguments::Arguments, error::Error, signature::Parameters, AsyncCallable};
-
+#[cfg(feature = "async")]
+use crate::AsyncCallable;
+use crate::{arguments::Arguments, error::Error, signature::Parameters};
 use alloc::boxed::Box;
+#[cfg(feature = "async")]
+use core::{marker::PhantomData, pin::Pin};
+#[cfg(feature = "async")]
 use futures_core::Future;
+
 use odu_value::Value;
 
 pub trait Callable {
@@ -27,11 +30,13 @@ where
     }
 }
 
+#[cfg(feature = "async")]
 pub trait Executor {
     fn spawn_blocking<F, R>(func: F) -> Pin<Box<dyn Future<Output = R> + Send>>;
 }
 
 pub trait CallableExt: Callable {
+    #[cfg(feature = "async")]
     fn into_async<E>(self) -> IntoAsync<Self, E>
     where
         Self: Sized,
@@ -42,26 +47,35 @@ pub trait CallableExt: Callable {
             _executor: PhantomData,
         }
     }
+
+    fn boxed(self) -> Box<dyn Callable>
+    where
+        Self: Sized + 'static,
+    {
+        Box::new(self)
+    }
 }
 
 impl<C> CallableExt for C where C: Callable {}
 
+#[cfg(feature = "async")]
 pub struct IntoAsync<C, E> {
     callable: C,
     _executor: PhantomData<E>,
 }
 
+#[cfg(feature = "async")]
 impl<C, E> AsyncCallable for IntoAsync<C, E>
 where
-    C: Callable + Clone + Send,
-    E: Executor,
+    C: Callable + Clone + Send + 'static,
+    E: Executor + 'static,
 {
-    type Future = Pin<Box<dyn Future<Output = Result<Value, Error>> + Send>>;
+    type Future<'a> = Pin<Box<dyn Future<Output = Result<Value, Error>> + Send + 'a>>;
     fn parameters(&self) -> Parameters {
         self.callable.parameters()
     }
 
-    fn call_async(&self, args: Arguments) -> Self::Future {
+    fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {
         let callable = self.callable.clone();
         E::spawn_blocking(move || callable.call(args))
     }

@@ -14,13 +14,15 @@ serde = [
     "odu-value/serde",
     "odu-validate/serde",
 ]
+validation = ["odu-validate"]
+async = ["futures-core"]
 
 [dependencies]
 odu-types = { path = "../odu-types" }
-odu-value = { path = "../odu-value" }
-odu-validate = { path = "../odu-validate" }
+odu-value = { path = "../odu-value", features = ["types"] }
+odu-validate = { path = "../odu-validate", optional = true }
 
-futures-core = { version = "0.3" }
+futures-core = { version = "0.3", default-features = false, optional = true }
 
 odu-macros = { path = "../odu-macros", optional = true }
 serde = { version = "1", default-features = false, features = [
@@ -36,4 +38,4 @@ serde_json = "1"
 [[example]]
 name = "funcs"
 path = "examples/funcs.rs"
-required-features = ["derive", "serde"]
+required-features = ["derive", "serde", "async", "validation"]

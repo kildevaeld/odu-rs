@@ -1,11 +1,14 @@
-use alloc::{boxed::Box, sync::Arc, vec::Vec};
+#[cfg(feature = "validation")]
+use crate::arguments::Arguments;
+#[cfg(feature = "validation")]
+pub use alloc::boxed::Box;
+use alloc::{sync::Arc, vec::Vec};
 use odu_types::Type;
+#[cfg(feature = "validation")]
 use odu_validate::{
     validations, ListValidator, ToValidator, Validation, ValidationBox, ValidationError, Validator,
     ValidatorBuilderExt,
 };
-
-use crate::arguments::Arguments;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Default, Clone)]
@@ -33,6 +36,7 @@ impl Parameters {
         }
     }
 
+    #[cfg(feature = "validation")]
     pub fn validate(&self, args: &Arguments) -> Result<(), ValidationError> {
         let params = match &self.0 {
             Some(params) => params,
@@ -62,6 +66,7 @@ impl Parameters {
     }
 }
 
+#[cfg(feature = "validation")]
 impl ToValidator for Parameters {
     fn validator(&self) -> Validator {
         let mut builder = ListValidator::default();

@@ -9,3 +9,5 @@ members = [
     "odu-macros",
     "floating",
 ]
+
+resolver = "2"

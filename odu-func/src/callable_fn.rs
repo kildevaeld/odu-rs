@@ -1,12 +1,14 @@
+#[cfg(feature = "async")]
+use crate::callable_async::AsyncCallable;
+#[cfg(feature = "async")]
 use alloc::boxed::Box;
-use core::future::Future;
 use core::marker::PhantomData;
-use core::pin::Pin;
+#[cfg(feature = "async")]
+use core::{future::Future, pin::Pin};
 use odu_value::Value;
 
 use crate::{
     arguments::{Arguments, FromArguments},
-    callable_async::AsyncCallable,
     func::Func,
     signature::Parameters,
     Callable, Error, Resultable,
@@ -55,7 +57,7 @@ where
     <F::Output as Resultable>::Ok: Into<Value>,
     <F::Output as Resultable>::Error: Into<Error>,
 {
-    fn parameters(&self) -> crate::signature::Parameters {
+    fn parameters(&self) -> Parameters {
         A::parameters()
     }
     fn call(&self, args: Arguments) -> Result<Value, Error> {
@@ -70,22 +72,23 @@ where
     }
 }
 
+#[cfg(feature = "async")]
 impl<F, A> AsyncCallable for CallableFunc<F, A>
 where
-    for<'a> A: FromArguments<'a>,
+    for<'a> A: FromArguments<'a> + 'a,
     F: crate::func::Func<A> + Clone + 'static,
     F::Output: Future,
     <F::Output as Future>::Output: Resultable,
     <<F::Output as Future>::Output as Resultable>::Error: Into<Error>,
     <<F::Output as Future>::Output as Resultable>::Ok: Into<Value>,
 {
-    type Future = Pin<Box<dyn Future<Output = Result<Value, Error>>>>;
+    type Future<'a> = Pin<Box<dyn Future<Output = Result<Value, Error>> + 'a>>;
 
     fn parameters(&self) -> Parameters {
         A::parameters()
     }
 
-    fn call_async(&self, args: Arguments) -> Self::Future {
+    fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {
         let func = self.func.clone();
         let future = async move {
             let args = A::from_arguments(&args).map_err(|err| err.into())?;
