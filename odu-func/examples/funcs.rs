@@ -1,6 +1,7 @@
 use odu_func::{
     arguments::{Arguments, ArgumentsBuilder, ToArguments},
-    AsyncCallable, Callable, CallableFunc, Error, FromValue, FuncExt, IntoValue, Type,
+    AsyncCallable, AsyncCallableExt, Callable, CallableFunc, Error, FromValue, FuncExt, IntoValue,
+    Type,
 };
 use odu_validate::ToValidator;
 
@@ -22,7 +23,8 @@ fn test(test: Test) -> Result<String, Error> {
 fn main() -> Result<(), Error> {
     let action = CallableFunc::new(|person: Person| async move {
         Result::<_, Error>::Ok(format!("Hello, {}", person.name))
-    });
+    })
+    .boxed_local();
 
     let callable = test.callable();
 

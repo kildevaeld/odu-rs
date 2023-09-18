@@ -23,7 +23,16 @@ pub trait AsyncCallableExt: AsyncCallable {
     {
         Box::new(self)
     }
+
+    fn boxed_local(self) -> LocalBoxAsyncCallable
+    where
+        Self: Sized + 'static,
+    {
+        Box::new(self)
+    }
 }
+
+impl<T> AsyncCallableExt for T where T: AsyncCallable {}
 
 pub type BoxAsyncCallable = Box<dyn internal::BoxAsyncCall>;
 
