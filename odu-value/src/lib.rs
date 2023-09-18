@@ -20,7 +20,7 @@ mod macros;
 mod merge;
 
 #[cfg(feature = "types")]
-mod types;
+pub mod types;
 
 pub use self::{
     from_value::*, index::Index, into_value::*, list::*, macros::*, merge::*, number::*, object::*,
