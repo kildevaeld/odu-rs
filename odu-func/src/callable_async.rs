@@ -18,7 +18,7 @@ pub trait AsyncCallable {
 pub trait AsyncCallableExt: AsyncCallable {
     fn boxed(self) -> BoxAsyncCallable
     where
-        Self: Sized + 'static,
+        Self: Sized + 'static + Send + Sync,
         for<'a> Self::Future<'a>: Send,
     {
         Box::new(self)
@@ -26,7 +26,7 @@ pub trait AsyncCallableExt: AsyncCallable {
 
     fn boxed_local(self) -> LocalBoxAsyncCallable
     where
-        Self: Sized + 'static,
+        Self: Sized + 'static + Send + Sync,
     {
         Box::new(self)
     }
@@ -34,9 +34,9 @@ pub trait AsyncCallableExt: AsyncCallable {
 
 impl<T> AsyncCallableExt for T where T: AsyncCallable {}
 
-pub type BoxAsyncCallable = Box<dyn internal::BoxAsyncCall>;
+pub type BoxAsyncCallable = Box<dyn internal::BoxAsyncCall + Send + Sync>;
 
-pub type LocalBoxAsyncCallable = Box<dyn internal::BoxLocalAsyncCall>;
+pub type LocalBoxAsyncCallable = Box<dyn internal::BoxLocalAsyncCall + Send + Sync>;
 
 mod internal {
     use futures_core::future::LocalBoxFuture;
