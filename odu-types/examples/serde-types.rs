@@ -31,9 +31,8 @@ fn main() {
 
     let o: ComplexType = serde_json::from_str(INPUT).expect("msg");
 
-    // println!("{:#?}", odu_types::type_info(ty));
+    
+  println!("types len: {}", odu_types::types_len());
 
-    //let o = serde_json::to_string_pretty(&ty).expect("serde");
-
-    println!("{:?}", o);
+    std::thread::sleep(std::time::Duration::from_secs(1000))
 }
