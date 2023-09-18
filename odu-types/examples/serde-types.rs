@@ -35,5 +35,8 @@ fn main() {
 
     //let o = serde_json::to_string_pretty(&ty).expect("serde");
 
-    println!("{:?}", o);
+    // println!("{:?} {}", ustr::total_allocated(), ustr::total_capacity());
+  println!("types len: {}", odu_types::types_len());
+
+    std::thread::sleep(std::time::Duration::from_secs(1000))
 }

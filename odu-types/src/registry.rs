@@ -39,6 +39,10 @@ fn registry() -> &'static RwLock<Registry> {
     })
 }
 
+pub fn len() -> usize {
+    registry().read().types.len()
+}
+
 pub fn type_id<T: HasStaticType + 'static>() -> TypeId {
     Registry::register::<T>()
 }
