@@ -11,7 +11,7 @@ use odu_validate::{
 };
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", serde(transparent))]
 pub struct Parameters(Option<Arc<Vec<Type>>>);
 
