@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.htmlshow_streams
 
 [features]
-default = ["async"]
+default = []
 derive = ["odu-macros"]
 serde = [
     "dep:serde",
@@ -16,6 +16,8 @@ serde = [
 ]
 validation = ["odu-validate"]
 async = ["futures-core"]
+tokio = ["dep:tokio", "async"]
+smol = ["dep:smol", "async"]
 
 [dependencies]
 odu-types = { path = "../odu-types" }
@@ -30,6 +32,8 @@ serde = { version = "1", default-features = false, features = [
     "rc",
 ], optional = true }
 
+tokio = { version = "1", features = ["rt"], optional = true }
+smol = { version = "1", optional = true }
 
 [dev-dependencies]
 futures-executor = "0.3"

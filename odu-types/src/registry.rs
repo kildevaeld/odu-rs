@@ -8,6 +8,15 @@ pub trait HasStaticType {
     fn create_type_info() -> ComplexType;
 }
 
+impl<'a, T> HasStaticType for &'a T
+where
+    T: HasStaticType,
+{
+    fn create_type_info() -> crate::ComplexType {
+        T::create_type_info()
+    }
+}
+
 static REGISTRY: OnceCell<RwLock<Registry>> = OnceCell::new();
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

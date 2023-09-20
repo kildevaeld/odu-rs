@@ -1,16 +1,21 @@
 #[cfg(feature = "async")]
 use crate::AsyncCallable;
-use crate::{arguments::Arguments, error::Error, signature::Parameters};
+use crate::{
+    arguments::Arguments,
+    error::Error,
+    signature::{Parameters, Signature},
+};
 use alloc::boxed::Box;
 #[cfg(feature = "async")]
 use core::{marker::PhantomData, pin::Pin};
 #[cfg(feature = "async")]
 use futures_core::Future;
+use odu_types::StaticTyped;
 
 use odu_value::Value;
 
 pub trait Callable {
-    fn parameters(&self) -> Parameters;
+    fn signature(&self) -> Signature;
 
     fn call(&self, args: Arguments) -> Result<Value, Error>;
 }
@@ -21,8 +26,8 @@ where
     E: Into<Error>,
     U: Into<Value>,
 {
-    fn parameters(&self) -> Parameters {
-        Parameters::new()
+    fn signature(&self) -> Signature {
+        Signature::new(Parameters::new(), Value::typed())
     }
 
     fn call(&self, args: Arguments) -> Result<Value, Error> {
@@ -32,7 +37,36 @@ where
 
 #[cfg(feature = "async")]
 pub trait Executor {
-    fn spawn_blocking<F, R>(func: F) -> Pin<Box<dyn Future<Output = R> + Send>>;
+    type Error;
+    fn spawn_blocking<F: FnOnce() -> R + 'static + Send, R: Send + 'static>(
+        func: F,
+    ) -> Pin<Box<dyn Future<Output = Result<R, Self::Error>> + Send>>;
+}
+
+#[cfg(feature = "tokio")]
+pub struct Tokio;
+
+#[cfg(feature = "tokio")]
+impl Executor for Tokio {
+    type Error = tokio::task::JoinError;
+    fn spawn_blocking<F: FnOnce() -> R + 'static + Send, R: Send + 'static>(
+        func: F,
+    ) -> Pin<Box<dyn Future<Output = Result<R, Self::Error>> + Send>> {
+        Box::pin(tokio::task::spawn_blocking(func))
+    }
+}
+
+#[cfg(feature = "smol")]
+pub struct Smol;
+
+#[cfg(feature = "smol")]
+impl Executor for Smol {
+    type Error = ();
+    fn spawn_blocking<F: FnOnce() -> R + 'static + Send, R: Send + 'static>(
+        func: F,
+    ) -> Pin<Box<dyn Future<Output = Result<R, Self::Error>> + Send>> {
+        Box::pin(async move { Ok(smol::unblock(func).await) })
+    }
 }
 
 pub trait CallableExt: Callable {
@@ -69,14 +103,21 @@ impl<C, E> AsyncCallable for IntoAsync<C, E>
 where
     C: Callable + Clone + Send + 'static,
     E: Executor + 'static,
+    E::Error: core::fmt::Debug + Send + Sync + 'static,
 {
     type Future<'a> = Pin<Box<dyn Future<Output = Result<Value, Error>> + Send + 'a>>;
-    fn parameters(&self) -> Parameters {
-        self.callable.parameters()
+    fn signature(&self) -> Signature {
+        self.callable.signature()
     }
 
     fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {
         let callable = self.callable.clone();
-        E::spawn_blocking(move || callable.call(args))
+        Box::pin(async move {
+            let ret = E::spawn_blocking(move || callable.call(args))
+                .await
+                .map_err(|err| Error::Runtime(Box::new(err)))?;
+
+            ret
+        })
     }
 }

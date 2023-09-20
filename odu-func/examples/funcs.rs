@@ -11,6 +11,10 @@ struct Person {
     age: u8,
 }
 
+impl Person {
+    pub fn test(self, string: &str) {}
+}
+
 #[derive(IntoValue, FromValue, Type)]
 struct Test {
     person: Person,
@@ -42,7 +46,7 @@ fn main() -> Result<(), Error> {
 
     println!(
         "{}",
-        serde_json::to_string_pretty(&callable.parameters().validator()).unwrap()
+        serde_json::to_string_pretty(&callable.signature().params().validator()).unwrap()
     );
 
     let args = ArgumentsBuilder::default()
@@ -56,7 +60,7 @@ fn main() -> Result<(), Error> {
 
     //let result = action.call(args)?;
 
-    println!("Result: {:?}", result);
+    println!("{:?}", callable.signature());
 
     Ok(())
 }

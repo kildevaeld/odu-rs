@@ -5,12 +5,13 @@ use alloc::boxed::Box;
 use core::marker::PhantomData;
 #[cfg(feature = "async")]
 use core::{future::Future, pin::Pin};
+use odu_types::StaticTyped;
 use odu_value::Value;
 
 use crate::{
     arguments::{Arguments, FromArguments},
     func::Func,
-    signature::Parameters,
+    signature::Signature,
     Callable, Error, Resultable,
 };
 
@@ -54,12 +55,16 @@ where
     for<'a> A: FromArguments<'a>,
     F: crate::func::Func<A>,
     F::Output: Resultable,
-    <F::Output as Resultable>::Ok: Into<Value>,
+    <F::Output as Resultable>::Ok: Into<Value> + StaticTyped,
     <F::Output as Resultable>::Error: Into<Error>,
 {
-    fn parameters(&self) -> Parameters {
-        A::parameters()
+    fn signature(&self) -> Signature {
+        Signature::new(
+            A::parameters(),
+            <<F::Output as Resultable>::Ok as StaticTyped>::typed(),
+        )
     }
+
     fn call(&self, args: Arguments) -> Result<Value, Error> {
         let args = A::from_arguments(&args).map_err(|err| err.into())?;
 
@@ -80,12 +85,15 @@ where
     F::Output: Future,
     <F::Output as Future>::Output: Resultable,
     <<F::Output as Future>::Output as Resultable>::Error: Into<Error>,
-    <<F::Output as Future>::Output as Resultable>::Ok: Into<Value>,
+    <<F::Output as Future>::Output as Resultable>::Ok: Into<Value> + StaticTyped,
 {
     type Future<'a> = Pin<Box<dyn Future<Output = Result<Value, Error>> + 'a>>;
 
-    fn parameters(&self) -> Parameters {
-        A::parameters()
+    fn signature(&self) -> Signature {
+        Signature::new(
+            A::parameters(),
+            <<<F::Output as Future>::Output as Resultable>::Ok as StaticTyped>::typed(),
+        )
     }
 
     fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {

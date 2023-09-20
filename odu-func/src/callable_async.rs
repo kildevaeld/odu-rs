@@ -1,16 +1,17 @@
-use crate::signature::Parameters;
+use crate::signature::{Parameters, Signature};
 use crate::{arguments::Arguments, Error, Resultable};
 use alloc::boxed::Box;
 use core::future::{Future, IntoFuture};
 use core::pin::Pin;
 use futures_core::future::{BoxFuture, LocalBoxFuture};
+use odu_types::StaticTyped;
 use odu_value::Value;
 
 pub trait AsyncCallable {
     type Future<'a>: Future<Output = Result<Value, Error>>
     where
         Self: 'a;
-    fn parameters(&self) -> Parameters;
+    fn signature(&self) -> Signature;
 
     fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a>;
 }
@@ -44,7 +45,7 @@ mod internal {
     use super::*;
 
     pub trait BoxAsyncCall {
-        fn parameters(&self) -> Parameters;
+        fn signature(&self) -> Signature;
         fn call<'a>(&'a self, args: super::Arguments) -> BoxFuture<'a, Result<Value, Error>>;
     }
 
@@ -53,8 +54,8 @@ mod internal {
         T: AsyncCallable,
         for<'a> T::Future<'a>: Send,
     {
-        fn parameters(&self) -> Parameters {
-            <T as AsyncCallable>::parameters(self)
+        fn signature(&self) -> Signature {
+            <T as AsyncCallable>::signature(self)
         }
 
         fn call<'a>(&'a self, args: super::Arguments) -> BoxFuture<'a, Result<Value, Error>> {
@@ -63,7 +64,7 @@ mod internal {
     }
 
     pub trait BoxLocalAsyncCall {
-        fn parameters(&self) -> Parameters;
+        fn signature(&self) -> Signature;
         fn call<'a>(&'a self, args: super::Arguments) -> LocalBoxFuture<'a, Result<Value, Error>>;
     }
 
@@ -71,8 +72,8 @@ mod internal {
     where
         T: AsyncCallable,
     {
-        fn parameters(&self) -> Parameters {
-            <T as AsyncCallable>::parameters(self)
+        fn signature(&self) -> Signature {
+            <T as AsyncCallable>::signature(self)
         }
 
         fn call<'a>(&'a self, args: super::Arguments) -> LocalBoxFuture<'a, Result<Value, Error>> {
@@ -83,8 +84,8 @@ mod internal {
 
 impl AsyncCallable for BoxAsyncCallable {
     type Future<'a> = BoxFuture<'a, Result<Value, Error>>;
-    fn parameters(&self) -> Parameters {
-        (**self).parameters()
+    fn signature(&self) -> Signature {
+        (**self).signature()
     }
     fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {
         (**self).call(args)
@@ -93,8 +94,8 @@ impl AsyncCallable for BoxAsyncCallable {
 
 impl AsyncCallable for LocalBoxAsyncCallable {
     type Future<'a> = LocalBoxFuture<'a, Result<Value, Error>>;
-    fn parameters(&self) -> Parameters {
-        (**self).parameters()
+    fn signature(&self) -> Signature {
+        (**self).signature()
     }
     fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {
         (**self).call(args)
@@ -112,8 +113,8 @@ where
 {
     type Future<'a> = Pin<Box<dyn Future<Output = Result<Value, Error>> + 'a>>;
 
-    fn parameters(&self) -> Parameters {
-        Parameters::new()
+    fn signature(&self) -> Signature {
+        Signature::new(Parameters::new(), Value::typed())
     }
 
     fn call_async<'a>(&'a self, args: Arguments) -> Self::Future<'a> {
