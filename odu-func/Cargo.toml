@@ -24,7 +24,9 @@ odu-types = { path = "../odu-types" }
 odu-value = { path = "../odu-value", features = ["types"] }
 odu-validate = { path = "../odu-validate", optional = true }
 
-futures-core = { version = "0.3", default-features = false, optional = true }
+futures-core = { version = "0.3", default-features = false, features = [
+    "alloc",
+], optional = true }
 
 odu-macros = { path = "../odu-macros", optional = true }
 serde = { version = "1", default-features = false, features = [
